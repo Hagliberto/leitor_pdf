@@ -16,7 +16,7 @@ Future<Uint8List?> readLocalPdfBytes(String localPath) async {
   return null;
 }
 
-/// No Web não há acesso permanente e recursivo a diretórios pelo FilePicker padrão.
-Future<List<({String path, String name})>> listPdfFilesRecursively(String directoryPath) async {
+/// No Web não há acesso permanente a diretórios pelo FilePicker padrão.
+Future<List<({String path, String name})>> listPdfFilesInDirectory(String directoryPath) async {
   return const <({String path, String name})>[];
 }

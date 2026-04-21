@@ -13,6 +13,7 @@ import 'package:printing/printing.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart' as sfpdf;
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
+import '../../../../core/constants/app_info.dart';
 import '../../data/repositories/pdf_repository.dart';
 import '../../domain/entities/pdf_document.dart';
 import '../../domain/entities/pdf_search_result.dart';
@@ -1202,13 +1203,13 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
                 leading: const Icon(Icons.account_circle_outlined),
                 title: const Text('Desenvolvedor'),
                 subtitle: const Text(
-                  'Eu, Hagliberto Alves de Oliveira, desenvolvi o Normativos para facilitar minha rotina de estudo, consulta e organização de documentos. O aplicativo reúne biblioteca, pastas, favoritos, busca, post-its e compartilhamento em uma experiência pensada para uso rápido no celular e no desktop.',
+                  'Eu, Hagliberto Alves de Oliveira, desenvolvi o Folhear para facilitar minha rotina de estudo, consulta e organização de documentos. O aplicativo reúne biblioteca, pastas, favoritos, busca, post-its e compartilhamento em uma experiência pensada para uso rápido no celular e no desktop.',
                 ),
               ),
               ListTile(
                 leading: const Icon(Icons.new_releases_outlined),
                 title: const Text('Versão do aplicativo'),
-                subtitle: const Text('Normativos v1.1.3+31 • versão sem PDFs embarcados'),
+                subtitle: const Text('${AppInfo.name} ${AppInfo.version} • ${AppInfo.releaseNote} • Atualizada em ${AppInfo.versionDate}'),
               ),
               ListTile(
                 leading: const Icon(Icons.picture_as_pdf_outlined),

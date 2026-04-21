@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../core/constants/app_info.dart';
 import '../features/pdf_reader/presentation/pages/pdf_home_page.dart';
 
 /// Widget raiz da aplicação.
@@ -13,7 +14,7 @@ class PdfReaderApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Normativos',
+      title: AppInfo.name,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -27,20 +28,20 @@ class PdfReaderApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const _NormativosSplashPage(),
+      home: const _FolhearSplashPage(),
     );
   }
 }
 
 /// Tela de abertura exibida por 3 segundos antes da Biblioteca.
-class _NormativosSplashPage extends StatefulWidget {
-  const _NormativosSplashPage();
+class _FolhearSplashPage extends StatefulWidget {
+  const _FolhearSplashPage();
 
   @override
-  State<_NormativosSplashPage> createState() => _NormativosSplashPageState();
+  State<_FolhearSplashPage> createState() => _FolhearSplashPageState();
 }
 
-class _NormativosSplashPageState extends State<_NormativosSplashPage>
+class _FolhearSplashPageState extends State<_FolhearSplashPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _fade;
@@ -115,7 +116,7 @@ class _NormativosSplashPageState extends State<_NormativosSplashPage>
                   Image.asset('assets/icon.png', width: 112, height: 112),
                   const SizedBox(height: 18),
                   const Text(
-                    'Normativos',
+                    AppInfo.name,
                     style: TextStyle(
                       fontSize: 34,
                       fontWeight: FontWeight.w900,
@@ -125,7 +126,7 @@ class _NormativosSplashPageState extends State<_NormativosSplashPage>
                   ),
                   const SizedBox(height: 6),
                   const Text(
-                    'Biblioteca inteligente de PDFs',
+                    AppInfo.subtitle,
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,

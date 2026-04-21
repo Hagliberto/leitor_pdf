@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/constants/app_info.dart';
 import '../../data/repositories/pdf_repository.dart';
 import '../../domain/entities/pdf_document.dart';
 import '../providers/pdf_provider.dart';
@@ -305,10 +307,23 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
   }
 
 
+  bool get _supportsFolderImport {
+    if (kIsWeb) return false;
+    return defaultTargetPlatform != TargetPlatform.android && defaultTargetPlatform != TargetPlatform.iOS;
+  }
+
   Future<void> _importPdfFolderFromDevice() async {
+    if (!_supportsFolderImport) {
+      _showElegantToast(
+        icon: Icons.info_outline_rounded,
+        message: 'No Android, importe PDFs selecionando arquivos. A importação de pasta fica disponível no desktop.',
+      );
+      return;
+    }
+
     final imported = await ref.read(pdfRepositoryProvider).importPdfsFromDirectory();
     if (imported.isEmpty) {
-      _showElegantToast(icon: Icons.folder_off_rounded, message: 'Nenhum PDF foi encontrado na pasta.');
+      _showElegantToast(icon: Icons.folder_off_rounded, message: 'Nenhum PDF foi encontrado diretamente na pasta.');
       return;
     }
     for (final doc in imported) {
@@ -316,7 +331,7 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
     }
     await _refreshFolders();
     await ref.read(pdfViewModelProvider.notifier).reload();
-    _showElegantToast(icon: Icons.folder_copy_rounded, message: '${imported.length} PDF(s) importado(s) da pasta.');
+    _showElegantToast(icon: Icons.folder_copy_rounded, message: '${imported.length} PDF(s) importado(s) da pasta selecionada.');
   }
 
   Future<void> _openMoveDocumentSheet(PdfDocument document) async {
@@ -404,7 +419,7 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
             ListTile(
               leading: const Icon(Icons.folder_copy_rounded, color: Color(0xFF2E7D32)),
               title: const Text('Importar pasta com PDFs'),
-              subtitle: const Text('Escolher uma pasta; no desktop varre subpastas automaticamente.'),
+              subtitle: const Text('Disponível no desktop; importa apenas PDFs existentes diretamente na pasta.'),
               onTap: () {
                 Navigator.of(context).pop();
                 Future<void>.delayed(const Duration(milliseconds: 120), _importPdfFolderFromDevice);
@@ -561,7 +576,7 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
               ListTile(
                 leading: const Icon(Icons.folder_copy_rounded, color: Color(0xFF2E7D32)),
                 title: const Text('Importar pasta de PDFs'),
-                subtitle: const Text('No Windows/Desktop, procura PDFs também dentro das subpastas.'),
+                subtitle: const Text('Disponível no desktop; não varre subpastas.'),
                 onTap: () {
                   Navigator.of(context).pop();
                   Future<void>.delayed(const Duration(milliseconds: 120), _importPdfFolderFromDevice);
@@ -572,13 +587,13 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
                 leading: const Icon(Icons.account_circle_outlined),
                 title: const Text('Desenvolvedor da aplicação'),
                 subtitle: const Text(
-                  'Eu, Hagliberto Alves de Oliveira, desenvolvi o Normativos para transformar a consulta de documentos em uma experiência mais simples, organizada e móvel. A ideia nasceu da necessidade de reunir PDFs importantes em uma biblioteca leve, com busca, favoritos, pastas, post-its e acesso rápido, reduzindo tempo perdido com arquivos espalhados.',
+                  'Eu, Hagliberto Alves de Oliveira, desenvolvi o Folhear para transformar a consulta de documentos em uma experiência mais simples, organizada e móvel. A ideia nasceu da necessidade de reunir PDFs importantes em uma biblioteca leve, com busca, favoritos, pastas, post-its e acesso rápido, reduzindo tempo perdido com arquivos espalhados.',
                 ),
               ),
               ListTile(
                 leading: const Icon(Icons.new_releases_outlined),
                 title: const Text('Versão do aplicativo'),
-                subtitle: const Text('Normativos v1.1.3+31 • edição sem PDFs embarcados, preparada para importação pelo usuário'),
+                subtitle: const Text('${AppInfo.name} ${AppInfo.version} • ${AppInfo.releaseNote} • Atualizada em ${AppInfo.versionDate}'),
               ),
               const Divider(),
               Padding(
@@ -759,20 +774,39 @@ class _BrandTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Row(
       children: [
         Container(
           width: 38,
           height: 38,
-          decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryContainer, borderRadius: BorderRadius.circular(14)),
-          child: Icon(Icons.article_outlined, color: Theme.of(context).colorScheme.primary),
+          decoration: BoxDecoration(color: scheme.primaryContainer, borderRadius: BorderRadius.circular(14)),
+          child: Icon(Icons.menu_book_rounded, color: scheme.primary),
         ),
         const SizedBox(width: 10),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Normativos', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
-            Text('Consulta rápida', style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Theme.of(context).colorScheme.primary)),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(AppInfo.name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [scheme.primary, const Color(0xFF2EA7FF)]),
+                    borderRadius: BorderRadius.circular(999),
+                    boxShadow: [BoxShadow(color: scheme.primary.withOpacity(0.25), blurRadius: 12, offset: const Offset(0, 4))],
+                  ),
+                  child: const Text(
+                    AppInfo.badge,
+                    style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.8),
+                  ),
+                ),
+              ],
+            ),
+            Text('Consulta rápida', style: Theme.of(context).textTheme.labelMedium?.copyWith(color: scheme.primary)),
           ],
         ),
       ],
@@ -802,7 +836,7 @@ class _HeroHeader extends StatelessWidget {
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900, color: scheme.onPrimaryContainer),
           ),
           const SizedBox(height: 4),
-          Text('$total documentos normativos', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: scheme.onPrimaryContainer)),
+          Text('$total documento(s) importado(s)', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: scheme.onPrimaryContainer)),
         ],
       ),
     );

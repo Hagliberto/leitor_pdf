@@ -44,42 +44,21 @@ class PdfRepository {
     }
   }
 
-  /// Carrega PDFs dos assets e PDFs importados pelo usuário.
+  /// Carrega apenas PDFs importados pelo usuário.
+  ///
+  /// Esta edição não embarca documentos em `assets/pdfs`. Assim, a biblioteca
+  /// inicial fica vazia até o usuário importar arquivos PDF pelo aplicativo.
   Future<List<PdfDocument>> fetchDocuments() async {
     final favorites = await getFavoriteFiles();
     final deleted = await getDeletedDocumentFiles();
-    final catalog = await _loadCatalogByFile();
-    final pdfAssetPaths = await _discoverPdfAssetPaths();
-
-    final documents = await Future.wait(
-      pdfAssetPaths.map((assetPath) async {
-        final fileKey = assetPath.startsWith(AssetPaths.pdfDirectory) ? assetPath.substring(AssetPaths.pdfDirectory.length) : assetPath;
-        final fileName = assetPath.split('/').last;
-        final catalogItem = catalog[fileKey] ?? catalog[fileName] ?? catalog[assetPath];
-
-        final document = catalogItem == null
-            ? PdfDocument(
-                file: fileKey,
-                title: _titleFromFileName(fileName),
-                description: 'Documento disponível na biblioteca.',
-                version: 'v1.0',
-                pageCount: await _countPdfPages(assetPath),
-              )
-            : PdfDocumentModel.fromJson(catalogItem).copyWith(
-                file: fileKey,
-                pageCount: (catalogItem['pageCount'] as int?) == null || (catalogItem['pageCount'] as int? ?? 0) <= 0
-                    ? await _countPdfPages(assetPath)
-                    : catalogItem['pageCount'] as int,
-              );
-
-        return document.copyWith(isFavorite: favorites.contains(document.file));
-      }),
-    );
-
     final localDocuments = await getLocalDocuments();
-    documents.removeWhere((doc) => deleted.contains(doc.file));
-    documents.addAll(localDocuments.where((doc) => !deleted.contains(doc.file)).map((doc) => doc.copyWith(isFavorite: favorites.contains(doc.file))));
-    documents.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+
+    final documents = localDocuments
+        .where((doc) => !deleted.contains(doc.file))
+        .map((doc) => doc.copyWith(isFavorite: favorites.contains(doc.file)))
+        .toList()
+      ..sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+
     return documents;
   }
 
@@ -322,10 +301,14 @@ class PdfRepository {
       return importPdfsFromDevice();
     }
 
+    if (defaultTargetPlatform == TargetPlatform.android || defaultTargetPlatform == TargetPlatform.iOS) {
+      return const <PdfDocument>[];
+    }
+
     final directoryPath = await FilePicker.platform.getDirectoryPath(dialogTitle: 'Escolha uma pasta com PDFs');
     if (directoryPath == null || directoryPath.isEmpty) return const <PdfDocument>[];
 
-    final files = await listPdfFilesRecursively(directoryPath);
+    final files = await listPdfFilesInDirectory(directoryPath);
     if (files.isEmpty) return const <PdfDocument>[];
 
     final current = await getLocalDocuments();

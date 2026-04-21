@@ -1,11 +1,11 @@
 {
-    "name": "Normativos",
-    "short_name": "Normativos",
+    "name": "Folhear",
+    "short_name": "Folhear",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#F4F8FC",
     "theme_color": "#0B5CAD",
-    "description": "Normativos - leitor e visualizador de documentos PDF.",
+    "description": "Folhear - leitor e visualizador de documentos PDF.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

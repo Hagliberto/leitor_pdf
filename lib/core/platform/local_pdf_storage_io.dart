@@ -41,13 +41,15 @@ Future<Uint8List?> readLocalPdfBytes(String localPath) async {
   return file.readAsBytes();
 }
 
-/// Lista recursivamente todos os PDFs de uma pasta escolhida pelo usuário.
-Future<List<({String path, String name})>> listPdfFilesRecursively(String directoryPath) async {
+/// Lista apenas os PDFs existentes diretamente na pasta escolhida pelo usuário.
+///
+/// A varredura não é recursiva para evitar importações inesperadas em massa.
+Future<List<({String path, String name})>> listPdfFilesInDirectory(String directoryPath) async {
   final root = Directory(directoryPath);
   if (!await root.exists()) return const <({String path, String name})>[];
 
   final files = <({String path, String name})>[];
-  await for (final entity in root.list(recursive: true, followLinks: false)) {
+  await for (final entity in root.list(recursive: false, followLinks: false)) {
     if (entity is File && entity.path.toLowerCase().endsWith('.pdf')) {
       final name = entity.uri.pathSegments.isNotEmpty ? Uri.decodeComponent(entity.uri.pathSegments.last) : entity.path.split(Platform.pathSeparator).last;
       files.add((path: entity.path, name: name));

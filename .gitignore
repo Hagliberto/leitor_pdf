@@ -10,7 +10,7 @@ android/local.properties
 android/app/build/
 android/app/.cxx/
 
-# IntelliJ / Android Studio / VS Code
+# IDEs
 .idea/
 *.iml
 .vscode/

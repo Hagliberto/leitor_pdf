@@ -1,4 +1,4 @@
-# Normativos — Flutter
+# Folhear — Flutter
 
 Aplicativo Flutter multiplataforma para leitura de documentos PDF locais em `assets/pdfs/`, com foco em Web, Android e iOS.
 
@@ -61,11 +61,11 @@ flutter create . --platforms=android,web
 flutter pub get
 ```
 
-Ajuste o nome exibido no Android para **Normativos**:
+Ajuste o nome exibido no Android para **Folhear**:
 
 ```powershell
 (Get-Content android\app\src\main\AndroidManifest.xml) `
-  -replace 'android:label="[^"]+"', 'android:label="Normativos"' |
+  -replace 'android:label="[^"]+"', 'android:label="Folhear"' |
   Set-Content android\app\src\main\AndroidManifest.xml
 ```
 
