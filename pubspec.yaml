@@ -1,0 +1,59 @@
+name: normativos
+description: Normativos - leitor e visualizador de documentos PDF multiplataforma.
+publish_to: "none"
+
+version: 1.1.3+31
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_localizations:
+    sdk: flutter
+
+  flutter_riverpod: ^3.0.3
+  syncfusion_flutter_pdfviewer: ^31.2.15
+  syncfusion_flutter_pdf: ^31.2.15
+  cross_file: ^0.3.4+2
+  shared_preferences: ^2.3.3
+  share_plus: ^10.1.4
+  printing: ^5.13.4
+  file_picker: ^8.3.7
+  path_provider: ^2.1.5
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    # Ícone do aplicativo.
+    - assets/icon.png
+    - assets/icon.gif
+
+    # PDFs colocados diretamente em assets/.
+    # Observação: no Flutter, novos arquivos adicionados aos assets precisam de novo build/hot restart.
+    - assets/
+
+    # PDFs e índices dentro da pasta principal de documentos.
+    # Esta linha é necessária para evitar 404 no Flutter Web em assets/assets/pdfs/*.
+    - assets/pdfs/
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  web:
+    generate: true
+    image_path: assets/icon.png
+    background_color: "#F4F8FC"
+    theme_color: "#0B5CAD"
+  image_path: assets/icon.png
+  min_sdk_android: 23

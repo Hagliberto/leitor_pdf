@@ -1,0 +1,23 @@
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins-dependencies
+.packages
+build/
+
+# Android/Gradle
+android/.gradle/
+android/local.properties
+android/app/build/
+android/app/.cxx/
+
+# IntelliJ / Android Studio / VS Code
+.idea/
+*.iml
+.vscode/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Símbolos de build/ofuscação
+build/symbols/
