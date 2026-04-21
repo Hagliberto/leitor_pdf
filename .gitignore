@@ -1,23 +1,79 @@
+# -----------------------------------------------------------------------------
 # Flutter/Dart
+# -----------------------------------------------------------------------------
 .dart_tool/
+.flutter-plugins
 .flutter-plugins-dependencies
 .packages
+.pub-cache/
+.pub/
 build/
 
-# Android/Gradle
+# Símbolos de build/ofuscação
+build/symbols/
+build/app/outputs/bundle/
+build/app/outputs/apk/
+
+# -----------------------------------------------------------------------------
+# Android
+# -----------------------------------------------------------------------------
 android/.gradle/
 android/local.properties
 android/app/build/
 android/app/.cxx/
+android/app/src/main/res/generated/
+android/app/debug/
+android/app/profile/
+android/app/release/
 
-# IDEs
+# -----------------------------------------------------------------------------
+# iOS
+# -----------------------------------------------------------------------------
+ios/.generated/
+ios/.tags/
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/Pods/
+ios/ServiceDefinitions.json
+# Se você usa CocoaPods, o arquivo abaixo é gerado automaticamente
+Podfile.lock
+
+# -----------------------------------------------------------------------------
+# IDEs (VS Code, IntelliJ, Android Studio)
+# -----------------------------------------------------------------------------
 .idea/
 *.iml
+*.ipr
+*.iws
 .vscode/
+.history/
+cmake-build-debug/
 
-# Sistema
+# -----------------------------------------------------------------------------
+# Sistema / Logs
+# -----------------------------------------------------------------------------
 .DS_Store
 Thumbs.db
+*.log
+*.temp
+*.tmp
 
-# Símbolos de build/ofuscação
-build/symbols/
+# -----------------------------------------------------------------------------
+# Solicitações Específicas
+# -----------------------------------------------------------------------------
+# Não subir a pasta VARIADOS (independente de onde esteja no projeto)
+VARIADOS/
+
+# Não subir arquivos compactados
+*.zip
+*.rar
+*.7z
+*.tar.gz
+
+# -----------------------------------------------------------------------------
+# Segurança (Recomendado)
+# -----------------------------------------------------------------------------
+# Nunca subir arquivos de ambiente com senhas/chaves
+.env*
