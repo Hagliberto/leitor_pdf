@@ -443,36 +443,66 @@ class PdfRepository {
     await _saveFolders(updated);
   }
 
-  Future<Map<int, String>> getPostItsForDocument(String file) async {
+  Future<List<Map<String, dynamic>>> getPostItsForDocument(String file) async {
     final prefs = await SharedPreferences.getInstance();
     final rawList = prefs.getStringList(_postItsKey) ?? <String>[];
-    final map = <int, String>{};
+    final items = <Map<String, dynamic>>[];
+
     for (final raw in rawList) {
       try {
         final json = jsonDecode(raw) as Map<String, dynamic>;
         if (json['file'] != file) continue;
+
         final page = json['page'] as int?;
         final text = json['text'] as String?;
-        if (page != null && text != null && text.trim().isNotEmpty) map[page] = text;
+        if (page == null || text == null || text.trim().isEmpty) continue;
+
+        final id = json['id'] as String? ?? 'legacy_${file.hashCode}_$page';
+        items.add(<String, dynamic>{
+          'id': id,
+          'file': file,
+          'page': page,
+          'text': text,
+          'updatedAt': json['updatedAt'] as String? ?? '',
+        });
       } catch (_) {}
     }
-    return map;
+
+    items.sort((a, b) {
+      final pageA = a['page'] as int? ?? 0;
+      final pageB = b['page'] as int? ?? 0;
+      if (pageA != pageB) return pageA.compareTo(pageB);
+      return (a['updatedAt'] as String? ?? '').compareTo(b['updatedAt'] as String? ?? '');
+    });
+
+    return items;
   }
 
-  Future<void> savePagePostIt({required String file, required int page, required String text}) async {
+  Future<void> savePagePostIt({required String file, required int page, required String id, required String text}) async {
     final prefs = await SharedPreferences.getInstance();
     final rawList = prefs.getStringList(_postItsKey) ?? <String>[];
     final items = <Map<String, dynamic>>[];
+
     for (final raw in rawList) {
       try {
         final item = jsonDecode(raw) as Map<String, dynamic>;
-        if (item['file'] == file && item['page'] == page) continue;
+        final itemId = item['id'] as String? ?? 'legacy_${file.hashCode}_$page';
+        final sameItem = item['file'] == file && item['page'] == page && itemId == id;
+        if (sameItem) continue;
         items.add(item);
       } catch (_) {}
     }
+
     if (text.trim().isNotEmpty) {
-      items.add(<String, dynamic>{'file': file, 'page': page, 'text': text.trim(), 'updatedAt': DateTime.now().toIso8601String()});
+      items.add(<String, dynamic>{
+        'id': id,
+        'file': file,
+        'page': page,
+        'text': text.trim(),
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
     }
+
     await prefs.setStringList(_postItsKey, items.map((item) => jsonEncode(item)).toList());
   }
 

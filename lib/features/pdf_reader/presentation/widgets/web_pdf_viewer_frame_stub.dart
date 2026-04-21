@@ -5,6 +5,7 @@ class WebPdfViewerFrame extends StatelessWidget {
   final String assetPath;
   final int page;
   final double zoom;
+  final String displayMode;
   final String searchTerm;
   final String? localBase64;
   final int reloadToken;
@@ -17,6 +18,7 @@ class WebPdfViewerFrame extends StatelessWidget {
     required this.assetPath,
     required this.page,
     required this.zoom,
+    this.displayMode = 'fitWidth',
     this.searchTerm = '',
     this.localBase64,
     required this.reloadToken,

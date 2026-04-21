@@ -16,6 +16,7 @@ class WebPdfViewerFrame extends StatefulWidget {
   final String assetPath;
   final int page;
   final double zoom;
+  final String displayMode;
   final String searchTerm;
   final String? localBase64;
   final int reloadToken;
@@ -28,6 +29,7 @@ class WebPdfViewerFrame extends StatefulWidget {
     required this.assetPath,
     required this.page,
     required this.zoom,
+    this.displayMode = 'fitWidth',
     this.searchTerm = '',
     this.localBase64,
     required this.reloadToken,
@@ -58,6 +60,7 @@ class _WebPdfViewerFrameState extends State<WebPdfViewerFrame> {
     if (oldWidget.assetPath != widget.assetPath ||
         oldWidget.page != widget.page ||
         oldWidget.zoom != widget.zoom ||
+        oldWidget.displayMode != widget.displayMode ||
         oldWidget.searchTerm != widget.searchTerm ||
         oldWidget.localBase64 != widget.localBase64 ||
         oldWidget.reloadToken != widget.reloadToken ||
@@ -82,6 +85,7 @@ class _WebPdfViewerFrameState extends State<WebPdfViewerFrame> {
       widget.assetPath,
       widget.page,
       widget.zoom,
+      widget.displayMode,
       widget.searchTerm,
       widget.localBase64 ?? '',
       widget.reloadToken,
@@ -131,10 +135,15 @@ class _WebPdfViewerFrameState extends State<WebPdfViewerFrame> {
     final zoomPercent = (widget.zoom * 100).round();
     final search = widget.searchTerm.trim();
 
+    final viewFragment = switch (widget.displayMode) {
+      'fitPage' => 'view=Fit',
+      'fitWidth' => 'view=FitH',
+      _ => 'zoom=$zoomPercent',
+    };
+
     final fragments = <String>[
       'page=${widget.page}',
-      'zoom=$zoomPercent',
-      'view=FitH',
+      viewFragment,
       'toolbar=0',
       'navpanes=0',
       'scrollbar=1',
