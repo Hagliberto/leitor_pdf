@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -64,7 +63,8 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
           tween: Tween(begin: 0.92, end: 1),
           duration: const Duration(milliseconds: 280),
           curve: Curves.easeOutBack,
-          builder: (context, value, child) => Transform.scale(scale: value, child: child),
+          builder: (context, value, child) =>
+              Transform.scale(scale: value, child: child),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
@@ -87,7 +87,8 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
                 Flexible(
                   child: Text(
                     message,
-                    style: const TextStyle(color: Color(0xFF0B315E), fontWeight: FontWeight.w800),
+                    style: const TextStyle(
+                        color: Color(0xFF0B315E), fontWeight: FontWeight.w800),
                   ),
                 ),
               ],
@@ -98,7 +99,11 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
     );
   }
 
-  void _showUndoToast({required IconData icon, required String message, required String actionLabel, required VoidCallback onUndo}) {
+  void _showUndoToast(
+      {required IconData icon,
+      required String message,
+      required String actionLabel,
+      required VoidCallback onUndo}) {
     final scheme = Theme.of(context).colorScheme;
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -106,19 +111,28 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
       elevation: 0,
       backgroundColor: Colors.transparent,
       duration: const Duration(seconds: 3),
-      action: SnackBarAction(label: actionLabel, textColor: scheme.primary, onPressed: onUndo),
+      action: SnackBarAction(
+          label: actionLabel, textColor: scheme.primary, onPressed: onUndo),
       content: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: const Color(0xFFEAF4FF),
           border: Border.all(color: const Color(0xFF7DBDFF)),
           borderRadius: BorderRadius.circular(24),
-          boxShadow: [BoxShadow(color: const Color(0xFF0B5CAD).withOpacity(0.20), blurRadius: 30, offset: const Offset(0, 12))],
+          boxShadow: [
+            BoxShadow(
+                color: const Color(0xFF0B5CAD).withOpacity(0.20),
+                blurRadius: 30,
+                offset: const Offset(0, 12))
+          ],
         ),
         child: Row(children: [
           Icon(icon, color: const Color(0xFF0B5CAD)),
           const SizedBox(width: 10),
-          Expanded(child: Text(message, style: const TextStyle(color: Color(0xFF0B315E), fontWeight: FontWeight.w800))),
+          Expanded(
+              child: Text(message,
+                  style: const TextStyle(
+                      color: Color(0xFF0B315E), fontWeight: FontWeight.w800))),
           const SizedBox(width: 8),
           const Icon(Icons.undo_rounded, color: Color(0xFF0B5CAD)),
         ]),
@@ -146,8 +160,11 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
   Future<void> _toggleDocumentFavorite(PdfDocument document) async {
     await ref.read(pdfViewModelProvider.notifier).toggleFavorite(document);
     _showElegantToast(
-      icon: document.isFavorite ? Icons.star_border_rounded : Icons.star_rounded,
-      message: document.isFavorite ? 'Documento removido dos favoritos.' : 'Documento favoritado.',
+      icon:
+          document.isFavorite ? Icons.star_border_rounded : Icons.star_rounded,
+      message: document.isFavorite
+          ? 'Documento removido dos favoritos.'
+          : 'Documento favoritado.',
     );
   }
 
@@ -157,10 +174,16 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
       builder: (context) => AlertDialog(
         icon: const Icon(Icons.delete_outline_rounded),
         title: const Text('Excluir PDF da biblioteca?'),
-        content: Text('O documento "${document.title}" será removido da lista e das pastas. Você terá 5 segundos para desfazer.'),
+        content: Text(
+            'O documento "${document.title}" será removido da lista e das pastas. Você terá 5 segundos para desfazer.'),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancelar')),
-          FilledButton.tonalIcon(onPressed: () => Navigator.of(context).pop(true), icon: const Icon(Icons.delete_outline_rounded), label: const Text('Excluir')),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancelar')),
+          FilledButton.tonalIcon(
+              onPressed: () => Navigator.of(context).pop(true),
+              icon: const Icon(Icons.delete_outline_rounded),
+              label: const Text('Excluir')),
         ],
       ),
     );
@@ -184,7 +207,8 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
     );
   }
 
-  Future<String?> _askFolderName({String title = 'Nova pasta', String initialValue = ''}) async {
+  Future<String?> _askFolderName(
+      {String title = 'Nova pasta', String initialValue = ''}) async {
     final controller = TextEditingController(text: initialValue);
     final value = await showDialog<String>(
       context: context,
@@ -196,8 +220,12 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
           decoration: const InputDecoration(labelText: 'Nome da pasta'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancelar')),
-          FilledButton(onPressed: () => Navigator.of(context).pop(controller.text), child: const Text('Salvar')),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar')),
+          FilledButton(
+              onPressed: () => Navigator.of(context).pop(controller.text),
+              child: const Text('Salvar')),
         ],
       ),
     );
@@ -207,12 +235,11 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
     return cleaned;
   }
 
-  Future<void> _createFolder([List<PdfDocument> availableDocuments = const <PdfDocument>[]]) async {
-    final result = await showModalBottomSheet<Map<String, dynamic>>(
+  Future<void> _createFolder(
+      [List<PdfDocument> availableDocuments = const <PdfDocument>[]]) async {
+    final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      useSafeArea: true,
+      barrierDismissible: true,
       builder: (context) {
         final nameController = TextEditingController();
         final colors = <Color>[
@@ -230,161 +257,182 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
 
         return StatefulBuilder(
           builder: (context, setModalState) {
-            final bottom = MediaQuery.viewInsetsOf(context).bottom;
-            return Padding(
-              padding: EdgeInsets.fromLTRB(16, 0, 16, 16 + bottom),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(colors: [Color(0xFFEAF4FF), Color(0xFFF7FBFF)]),
-                      borderRadius: BorderRadius.circular(26),
-                      border: Border.all(color: const Color(0xFFB8D9FF)),
+            return Dialog.fullscreen(
+              child: Scaffold(
+                appBar: AppBar(
+                  title: const Text('Nova pasta'),
+                  actions: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: FilledButton.icon(
+                        onPressed: () {
+                          final cleaned = nameController.text.trim();
+                          if (cleaned.isEmpty) return;
+                          Navigator.of(context).pop(<String, dynamic>{
+                            'name': cleaned,
+                            'colorValue': selectedColor.toARGB32(),
+                            'selectedFiles': selectedFiles.toList(),
+                          });
+                        },
+                        icon: const Icon(Icons.check_circle_outline_rounded),
+                        label: const Text('Criar pasta'),
+                      ),
                     ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 52,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(colors: [selectedColor, selectedColor.withOpacity(0.72)]),
-                            borderRadius: BorderRadius.circular(18),
-                            boxShadow: [BoxShadow(color: selectedColor.withOpacity(0.22), blurRadius: 18, offset: const Offset(0, 8))],
-                          ),
-                          child: const Icon(Icons.create_new_folder_rounded, color: Colors.white),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
+                  ],
+                ),
+                body: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isWide = constraints.maxWidth >= 980;
+                    return SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 1280),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Nova pasta inteligente', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900)),
-                              const SizedBox(height: 4),
-                              const Text('Crie uma pasta personalizada, escolha a cor de destaque e, se desejar, já vincule PDFs importados para organizar sua biblioteca desde o início.'),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 12),
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(colors: [
+                                    Color(0xFFEAF4FF),
+                                    Color(0xFFF7FBFF)
+                                  ]),
+                                  borderRadius: BorderRadius.circular(22),
+                                  border: Border.all(
+                                      color: const Color(0xFFB8D9FF)),
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: selectedColor.withValues(
+                                            alpha: 0.08),
+                                        blurRadius: 14,
+                                        offset: const Offset(0, 6))
+                                  ],
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    AnimatedContainer(
+                                      duration:
+                                          const Duration(milliseconds: 200),
+                                      width: 46,
+                                      height: 46,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(colors: [
+                                          selectedColor,
+                                          selectedColor.withValues(alpha: 0.72)
+                                        ]),
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      child: const Icon(
+                                          Icons.create_new_folder_rounded,
+                                          color: Colors.white,
+                                          size: 24),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text('Criar pasta inteligente',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleLarge
+                                                  ?.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w900)),
+                                          const SizedBox(height: 4),
+                                          const Text(
+                                            'Defina nome, cor e PDFs vinculados em uma tela ampla e sem cortes.',
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Wrap(
+                                      spacing: 8,
+                                      runSpacing: 8,
+                                      children: const [
+                                        _TinyPill(
+                                            icon: Icons.palette_outlined,
+                                            label: 'Cor'),
+                                        _TinyPill(
+                                            icon: Icons.picture_as_pdf_rounded,
+                                            label: 'PDFs'),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              if (isWide)
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      flex: 5,
+                                      child: _FolderFormSection(
+                                        nameController: nameController,
+                                        colors: colors,
+                                        selectedColor: selectedColor,
+                                        onColorChanged: (color) =>
+                                            setModalState(
+                                                () => selectedColor = color),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 18),
+                                    Expanded(
+                                      flex: 7,
+                                      child: _FolderDocumentsSection(
+                                        availableDocuments: availableDocuments,
+                                        selectedFiles: selectedFiles,
+                                        onToggleFile: (file, selected) {
+                                          setModalState(() {
+                                            if (selected) {
+                                              selectedFiles.add(file);
+                                            } else {
+                                              selectedFiles.remove(file);
+                                            }
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              else ...[
+                                _FolderFormSection(
+                                  nameController: nameController,
+                                  colors: colors,
+                                  selectedColor: selectedColor,
+                                  onColorChanged: (color) => setModalState(
+                                      () => selectedColor = color),
+                                ),
+                                const SizedBox(height: 18),
+                                _FolderDocumentsSection(
+                                  availableDocuments: availableDocuments,
+                                  selectedFiles: selectedFiles,
+                                  onToggleFile: (file, selected) {
+                                    setModalState(() {
+                                      if (selected) {
+                                        selectedFiles.add(file);
+                                      } else {
+                                        selectedFiles.remove(file);
+                                      }
+                                    });
+                                  },
+                                ),
+                              ],
                             ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  TextField(
-                    controller: nameController,
-                    autofocus: true,
-                    decoration: InputDecoration(
-                      labelText: 'Nome da pasta',
-                      hintText: 'Ex.: Estudos, Normas, Processos, Editais',
-                      prefixIcon: const Icon(Icons.drive_file_rename_outline_rounded),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
-                      filled: true,
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Text('Cor da pasta', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900)),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: [
-                      for (final color in colors)
-                        InkWell(
-                          borderRadius: BorderRadius.circular(999),
-                          onTap: () => setModalState(() => selectedColor = color),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 180),
-                            width: 42,
-                            height: 42,
-                            decoration: BoxDecoration(
-                              color: color,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: selectedColor.value == color.value ? Colors.black12 : Colors.transparent, width: 3),
-                              boxShadow: [BoxShadow(color: color.withOpacity(selectedColor.value == color.value ? 0.35 : 0.16), blurRadius: 14, offset: const Offset(0, 6))],
-                            ),
-                            child: selectedColor.value == color.value ? const Icon(Icons.check_rounded, color: Colors.white) : null,
-                          ),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  Row(
-                    children: [
-                      Expanded(child: Text('Selecionar PDFs para esta pasta', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900))),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(color: const Color(0xFFEAF4FF), borderRadius: BorderRadius.circular(999), border: Border.all(color: const Color(0xFFB8D9FF))),
-                        child: Text('${selectedFiles.length} selecionado(s)', style: const TextStyle(fontWeight: FontWeight.w800, color: Color(0xFF0B5CAD))),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  if (availableDocuments.isEmpty)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(color: const Color(0xFFFFF8E1), borderRadius: BorderRadius.circular(18), border: Border.all(color: const Color(0xFFFFE082))),
-                      child: const Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(Icons.info_outline_rounded, color: Color(0xFFF57F17)),
-                          SizedBox(width: 10),
-                          Expanded(child: Text('Ainda não há PDFs importados na biblioteca. Você pode criar a pasta agora e vincular documentos depois, assim que fizer o upload dos arquivos PDF.')),
-                        ],
-                      ),
-                    )
-                  else
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxHeight: 220),
-                      child: SingleChildScrollView(
-                        child: Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
-                          children: [
-                            for (final doc in availableDocuments)
-                              FilterChip(
-                                selected: selectedFiles.contains(doc.file),
-                                avatar: const Icon(Icons.picture_as_pdf_rounded, size: 18, color: Color(0xFFD32F2F)),
-                                label: SizedBox(
-                                  width: 180,
-                                  child: Text(doc.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-                                ),
-                                onSelected: (value) => setModalState(() {
-                                  if (value) {
-                                    selectedFiles.add(doc.file);
-                                  } else {
-                                    selectedFiles.remove(doc.file);
-                                  }
-                                }),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  const SizedBox(height: 18),
-                  Row(
-                    children: [
-                      Expanded(child: OutlinedButton.icon(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.close_rounded), label: const Text('Cancelar'))),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: FilledButton.icon(
-                          onPressed: () {
-                            final cleaned = nameController.text.trim();
-                            if (cleaned.isEmpty) return;
-                            Navigator.of(context).pop(<String, dynamic>{
-                              'name': cleaned,
-                              'colorValue': selectedColor.value,
-                              'selectedFiles': selectedFiles.toList(),
-                            });
-                          },
-                          icon: const Icon(Icons.check_circle_outline_rounded),
-                          label: const Text('Criar pasta'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                    );
+                  },
+                ),
               ),
             );
           },
@@ -392,31 +440,49 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
       },
     );
     if (result == null) return;
-    final folder = await ref.read(pdfRepositoryProvider).createFolder(name: result['name'] as String, parentId: _selectedFolderId);
-    await ref.read(pdfRepositoryProvider).updateFolderColor(folderId: folder.id, colorValue: result['colorValue'] as int);
-    final selectedFiles = (result['selectedFiles'] as List<dynamic>? ?? const <dynamic>[]).map((e) => e.toString()).toList();
+    final folder = await ref.read(pdfRepositoryProvider).createFolder(
+        name: result['name'] as String, parentId: _selectedFolderId);
+    await ref.read(pdfRepositoryProvider).updateFolderColor(
+        folderId: folder.id, colorValue: result['colorValue'] as int);
+    final selectedFiles =
+        (result['selectedFiles'] as List<dynamic>? ?? const <dynamic>[])
+            .map((e) => e.toString())
+            .toList();
     for (final file in selectedFiles) {
-      await ref.read(pdfRepositoryProvider).toggleDocumentInFolder(folderId: folder.id, documentFile: file);
+      await ref
+          .read(pdfRepositoryProvider)
+          .toggleDocumentInFolder(folderId: folder.id, documentFile: file);
     }
     await _refreshFolders();
-    _showElegantToast(icon: Icons.create_new_folder_rounded, message: 'Pasta "${result['name']}" criada com sucesso.');
+    _showElegantToast(
+        icon: Icons.create_new_folder_rounded,
+        message: 'Pasta "${result['name']}" criada com sucesso.');
   }
 
   Future<void> _renameFolder(PdfFolder folder) async {
     if (folder.id == 'root') {
-      _showElegantToast(icon: Icons.info_outline_rounded, message: 'A pasta Documentos é fixa.');
+      _showElegantToast(
+          icon: Icons.info_outline_rounded,
+          message: 'A pasta Documentos é fixa.');
       return;
     }
-    final name = await _askFolderName(title: 'Renomear pasta', initialValue: folder.name);
+    final name = await _askFolderName(
+        title: 'Renomear pasta', initialValue: folder.name);
     if (name == null) return;
-    await ref.read(pdfRepositoryProvider).renameFolder(folderId: folder.id, name: name);
+    await ref
+        .read(pdfRepositoryProvider)
+        .renameFolder(folderId: folder.id, name: name);
     await _refreshFolders();
-    _showElegantToast(icon: Icons.drive_file_rename_outline_rounded, message: 'Pasta renomeada.');
+    _showElegantToast(
+        icon: Icons.drive_file_rename_outline_rounded,
+        message: 'Pasta renomeada.');
   }
 
   Future<void> _deleteFolder(PdfFolder folder) async {
     if (folder.id == 'root') {
-      _showElegantToast(icon: Icons.info_outline_rounded, message: 'A pasta Documentos é fixa.');
+      _showElegantToast(
+          icon: Icons.info_outline_rounded,
+          message: 'A pasta Documentos é fixa.');
       return;
     }
     final confirm = await showDialog<bool>(
@@ -424,10 +490,16 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
       builder: (context) => AlertDialog(
         icon: const Icon(Icons.folder_delete_rounded),
         title: Text('Excluir pasta "${folder.name}"?'),
-        content: const Text('Os PDFs não serão apagados. Apenas a pasta e seus vínculos serão removidos.'),
+        content: const Text(
+            'Os PDFs não serão apagados. Apenas a pasta e seus vínculos serão removidos.'),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancelar')),
-          FilledButton.tonalIcon(onPressed: () => Navigator.of(context).pop(true), icon: const Icon(Icons.delete_outline_rounded), label: const Text('Excluir')),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancelar')),
+          FilledButton.tonalIcon(
+              onPressed: () => Navigator.of(context).pop(true),
+              icon: const Icon(Icons.delete_outline_rounded),
+              label: const Text('Excluir')),
         ],
       ),
     );
@@ -435,11 +507,22 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
     await ref.read(pdfRepositoryProvider).deleteFolder(folder.id);
     setState(() => _selectedFolderId = 'root');
     await _refreshFolders();
-    _showUndoToast(icon: Icons.folder_delete_rounded, message: 'Pasta excluída.', actionLabel: 'OK', onUndo: () {});
+    _showUndoToast(
+        icon: Icons.folder_delete_rounded,
+        message: 'Pasta excluída.',
+        actionLabel: 'OK',
+        onUndo: () {});
   }
 
   Future<void> _changeFolderColor(PdfFolder folder) async {
-    final colors = <Color>[const Color(0xFF0B5CAD), const Color(0xFF00A2C7), const Color(0xFF2E7D32), const Color(0xFFF9A825), const Color(0xFFC62828), const Color(0xFF6A1B9A)];
+    final colors = <Color>[
+      const Color(0xFF0B5CAD),
+      const Color(0xFF00A2C7),
+      const Color(0xFF2E7D32),
+      const Color(0xFFF9A825),
+      const Color(0xFFC62828),
+      const Color(0xFF6A1B9A)
+    ];
     final selected = await showDialog<Color>(
       context: context,
       builder: (context) => AlertDialog(
@@ -451,14 +534,19 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
             for (final color in colors)
               InkWell(
                 onTap: () => Navigator.of(context).pop(color),
-                child: CircleAvatar(backgroundColor: color, child: folder.colorValue == color.value ? const Icon(Icons.check, color: Colors.white) : null),
+                child: CircleAvatar(
+                    backgroundColor: color,
+                    child: folder.colorValue == color.toARGB32()
+                        ? const Icon(Icons.check, color: Colors.white)
+                        : null),
               ),
           ],
         ),
       ),
     );
     if (selected == null) return;
-    await ref.read(pdfRepositoryProvider).updateFolderColor(folderId: folder.id, colorValue: selected.value);
+    await ref.read(pdfRepositoryProvider).updateFolderColor(
+        folderId: folder.id, colorValue: selected.toARGB32());
     await _refreshFolders();
   }
 
@@ -470,55 +558,59 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
       builder: (context) => Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 22),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          ListTile(leading: Icon(Icons.folder_rounded, color: Color(folder.colorValue)), title: Text(folder.name), subtitle: const Text('Gerenciar pasta')),
-          ListTile(leading: const Icon(Icons.drive_file_rename_outline_rounded), title: const Text('Editar nome'), onTap: () { Navigator.of(context).pop(); Future<void>.delayed(const Duration(milliseconds: 120), () => _renameFolder(folder)); }),
-          ListTile(leading: const Icon(Icons.palette_outlined), title: const Text('Alterar cor'), onTap: () { Navigator.of(context).pop(); Future<void>.delayed(const Duration(milliseconds: 120), () => _changeFolderColor(folder)); }),
-          ListTile(enabled: folder.id != 'root', leading: const Icon(Icons.folder_delete_outlined), title: const Text('Excluir pasta'), onTap: () { Navigator.of(context).pop(); Future<void>.delayed(const Duration(milliseconds: 120), () => _deleteFolder(folder)); }),
+          ListTile(
+              leading:
+                  Icon(Icons.folder_rounded, color: Color(folder.colorValue)),
+              title: Text(folder.name),
+              subtitle: const Text('Gerenciar pasta')),
+          ListTile(
+              leading: const Icon(Icons.drive_file_rename_outline_rounded),
+              title: const Text('Editar nome'),
+              onTap: () {
+                Navigator.of(context).pop();
+                Future<void>.delayed(const Duration(milliseconds: 120),
+                    () => _renameFolder(folder));
+              }),
+          ListTile(
+              leading: const Icon(Icons.palette_outlined),
+              title: const Text('Alterar cor'),
+              onTap: () {
+                Navigator.of(context).pop();
+                Future<void>.delayed(const Duration(milliseconds: 120),
+                    () => _changeFolderColor(folder));
+              }),
+          ListTile(
+              enabled: folder.id != 'root',
+              leading: const Icon(Icons.folder_delete_outlined),
+              title: const Text('Excluir pasta'),
+              onTap: () {
+                Navigator.of(context).pop();
+                Future<void>.delayed(const Duration(milliseconds: 120),
+                    () => _deleteFolder(folder));
+              }),
         ]),
       ),
     );
   }
 
   Future<void> _importPdfsFromDevice() async {
-    final imported = await ref.read(pdfRepositoryProvider).importPdfsFromDevice();
+    final imported =
+        await ref.read(pdfRepositoryProvider).importPdfsFromDevice();
     if (imported.isEmpty) {
-      _showElegantToast(icon: Icons.info_outline_rounded, message: 'Nenhum PDF foi importado.');
-      return;
-    }
-    for (final doc in imported) {
-      await ref.read(pdfRepositoryProvider).toggleDocumentInFolder(folderId: _selectedFolderId, documentFile: doc.file);
-    }
-    await _refreshFolders();
-    await ref.read(pdfViewModelProvider.notifier).reload();
-    _showElegantToast(icon: Icons.file_upload_rounded, message: '${imported.length} PDF(s) importado(s).');
-  }
-
-
-  bool get _supportsFolderImport {
-    if (kIsWeb) return false;
-    return defaultTargetPlatform != TargetPlatform.android && defaultTargetPlatform != TargetPlatform.iOS;
-  }
-
-  Future<void> _importPdfFolderFromDevice() async {
-    if (!_supportsFolderImport) {
       _showElegantToast(
-        icon: Icons.info_outline_rounded,
-        message: 'No Android, importe PDFs selecionando arquivos. A importação de pasta fica disponível no desktop.',
-      );
-      return;
-    }
-
-    final imported = await ref.read(pdfRepositoryProvider).importPdfsFromDirectory();
-    if (imported.isEmpty) {
-      _showElegantToast(icon: Icons.folder_off_rounded, message: 'Nenhum PDF foi encontrado diretamente na pasta.');
+          icon: Icons.info_outline_rounded,
+          message: 'Nenhum PDF foi importado.');
       return;
     }
     for (final doc in imported) {
-      await ref.read(pdfRepositoryProvider).toggleDocumentInFolder(folderId: _selectedFolderId, documentFile: doc.file);
+      await ref.read(pdfRepositoryProvider).toggleDocumentInFolder(
+          folderId: _selectedFolderId, documentFile: doc.file);
     }
     await _refreshFolders();
     await ref.read(pdfViewModelProvider.notifier).reload();
-    _showElegantToast(icon: Icons.folder_copy_rounded, message: '${imported.length} PDF(s) importado(s) da pasta selecionada.');
+    _showElegantToast(
+        icon: Icons.file_upload_rounded,
+        message: '${imported.length} PDF(s) importado(s).');
   }
 
   Future<void> _openMoveDocumentSheet(PdfDocument document) async {
@@ -536,7 +628,8 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
             ListTile(
               leading: const Icon(Icons.picture_as_pdf_rounded),
               title: Text(document.title),
-              subtitle: const Text('Escolha uma pasta para mover ou adicionar.'),
+              subtitle:
+                  const Text('Escolha uma pasta para mover ou adicionar.'),
             ),
             const Divider(),
             Flexible(
@@ -545,24 +638,43 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
                 children: [
                   for (final folder in _folders)
                     ListTile(
-                      leading: Icon(folder.id == _selectedFolderId ? Icons.folder_special_rounded : Icons.folder_rounded),
+                      leading: Icon(folder.id == _selectedFolderId
+                          ? Icons.folder_special_rounded
+                          : Icons.folder_rounded),
                       title: Text(folder.name),
-                      subtitle: Text(folder.documentFiles.contains(document.file) ? 'Já contém este PDF' : 'Adicionar/mover para esta pasta'),
+                      subtitle: Text(
+                          folder.documentFiles.contains(document.file)
+                              ? 'Já contém este PDF'
+                              : 'Adicionar/mover para esta pasta'),
                       onTap: () async {
                         Navigator.of(context).pop();
-                        await ref.read(pdfRepositoryProvider).moveDocumentToFolder(folderId: folder.id, documentFile: document.file);
+                        await ref
+                            .read(pdfRepositoryProvider)
+                            .moveDocumentToFolder(
+                                folderId: folder.id,
+                                documentFile: document.file);
                         setState(() => _selectedFolderId = folder.id);
                         await _refreshFolders();
-                        _showElegantToast(icon: Icons.drive_file_move_rounded, message: 'PDF movido para ${folder.name}.');
+                        _showElegantToast(
+                            icon: Icons.drive_file_move_rounded,
+                            message: 'PDF movido para ${folder.name}.');
                       },
                       trailing: IconButton(
                         tooltip: 'Adicionar/remover nesta pasta',
-                        icon: Icon(folder.documentFiles.contains(document.file) ? Icons.remove_circle_outline : Icons.add_circle_outline),
+                        icon: Icon(folder.documentFiles.contains(document.file)
+                            ? Icons.remove_circle_outline
+                            : Icons.add_circle_outline),
                         onPressed: () async {
                           Navigator.of(context).pop();
-                          await ref.read(pdfRepositoryProvider).toggleDocumentInFolder(folderId: folder.id, documentFile: document.file);
+                          await ref
+                              .read(pdfRepositoryProvider)
+                              .toggleDocumentInFolder(
+                                  folderId: folder.id,
+                                  documentFile: document.file);
                           await _refreshFolders();
-                          _showElegantToast(icon: Icons.folder_copy_rounded, message: 'Vínculo da pasta atualizado.');
+                          _showElegantToast(
+                              icon: Icons.folder_copy_rounded,
+                              message: 'Vínculo da pasta atualizado.');
                         },
                       ),
                     ),
@@ -576,125 +688,77 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
   }
 
   void _openFoldersBrowserSheet(List<PdfDocument> documents) {
-    showModalBottomSheet<void>(
+    showDialog<void>(
       context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      useSafeArea: true,
+      barrierDismissible: true,
       builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            final orderedFolders = [..._folders]..sort((a, b) {
-              final depthA = _folderDepth(a);
-              final depthB = _folderDepth(b);
-              if (depthA != depthB) return depthA.compareTo(depthB);
-              return a.name.toLowerCase().compareTo(b.name.toLowerCase());
-            });
-            final width = MediaQuery.sizeOf(context).width;
-            final columns = width >= 1100 ? 4 : width >= 760 ? 3 : 2;
-            return Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(colors: [Color(0xFFEAF4FF), Color(0xFFF8FBFF)]),
-                      borderRadius: BorderRadius.circular(28),
-                      border: Border.all(color: const Color(0xFFB8D9FF)),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 52,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(colors: [Color(0xFF0B5CAD), Color(0xFF42A5F5)]),
-                            borderRadius: BorderRadius.circular(18),
-                            boxShadow: [BoxShadow(color: const Color(0xFF0B5CAD).withOpacity(0.18), blurRadius: 18, offset: const Offset(0, 8))],
-                          ),
-                          child: const Icon(Icons.folder_copy_rounded, color: Colors.white),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Pastas da biblioteca', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900)),
-                              const SizedBox(height: 4),
-                              Text('Escolha uma pasta para filtrar a biblioteca, organize seus PDFs em categorias e acesse rapidamente a estrutura ${_showFolderTree ? 'em árvore' : 'em colunas'} com uma visualização mais confortável.'),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+        final orderedFolders = [..._folders]..sort((a, b) {
+            final depthA = _folderDepth(a);
+            final depthB = _folderDepth(b);
+            if (depthA != depthB) return depthA.compareTo(depthB);
+            return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+          });
+        return Dialog.fullscreen(
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text('Pastas da biblioteca'),
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: FilledButton.icon(
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                      await Future<void>.delayed(
+                          const Duration(milliseconds: 120));
+                      await _createFolder(documents);
+                    },
+                    icon: const Icon(Icons.create_new_folder_rounded),
+                    label: const Text('Nova pasta'),
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SegmentedButton<bool>(
-                          segments: const [
-                            ButtonSegment<bool>(value: false, icon: Icon(Icons.grid_view_rounded), label: Text('Colunas')),
-                            ButtonSegment<bool>(value: true, icon: Icon(Icons.account_tree_rounded), label: Text('Árvore')),
-                          ],
-                          selected: {_showFolderTree},
-                          onSelectionChanged: (selection) {
-                            setState(() => _showFolderTree = selection.first);
-                            setModalState(() {});
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      FilledButton.icon(
-                        onPressed: () async {
-                          Navigator.of(context).pop();
-                          await Future<void>.delayed(const Duration(milliseconds: 120));
-                          await _createFolder(documents);
+                ),
+              ],
+            ),
+            body: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _FoldersPageHeader(
+                        foldersCount: orderedFolders.length,
+                        documentsCount: documents.length),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: ListView.separated(
+                        itemCount: orderedFolders.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 10),
+                        itemBuilder: (context, index) {
+                          final folder = orderedFolders[index];
+                          final depth = _folderDepth(folder);
+                          return _FolderTreeTile(
+                            folder: folder,
+                            depth: depth,
+                            selected: folder.id == _selectedFolderId,
+                            path: _folderPath(folder),
+                            onTap: () {
+                              setState(() => _selectedFolderId = folder.id);
+                              Navigator.of(context).pop();
+                            },
+                            onOptions: () {
+                              Navigator.of(context).pop();
+                              Future<void>.delayed(
+                                  const Duration(milliseconds: 120),
+                                  () => _openFolderOptionsSheet(folder));
+                            },
+                          );
                         },
-                        icon: const Icon(Icons.create_new_folder_rounded),
-                        label: const Text('Nova pasta'),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  Flexible(
-                    child: GridView.builder(
-                      shrinkWrap: true,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: columns,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                        mainAxisExtent: 136,
-                      ),
-                      itemCount: orderedFolders.length,
-                      itemBuilder: (context, index) {
-                        final folder = orderedFolders[index];
-                        final isSelected = folder.id == _selectedFolderId;
-                        final path = _folderPath(folder);
-                        return _FolderGridCard(
-                          folder: folder,
-                          selected: isSelected,
-                          treeMode: _showFolderTree,
-                          path: path,
-                          onTap: () {
-                            setState(() => _selectedFolderId = folder.id);
-                            Navigator.of(context).pop();
-                          },
-                          onOptions: () {
-                            Navigator.of(context).pop();
-                            Future<void>.delayed(const Duration(milliseconds: 120), () => _openFolderOptionsSheet(folder));
-                          },
-                        );
-                      },
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            );
-          },
+            ),
+          ),
         );
       },
     );
@@ -704,7 +768,9 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
     int depth = 0;
     String? parentId = folder.parentId;
     while (parentId != null && parentId != 'root') {
-      final parent = _folders.cast<PdfFolder?>().firstWhere((item) => item?.id == parentId, orElse: () => null);
+      final parent = _folders
+          .cast<PdfFolder?>()
+          .firstWhere((item) => item?.id == parentId, orElse: () => null);
       if (parent == null) break;
       depth += 1;
       parentId = parent.parentId;
@@ -717,7 +783,9 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
     final names = <String>[folder.name];
     String? parentId = folder.parentId;
     while (parentId != null) {
-      final parent = _folders.cast<PdfFolder?>().firstWhere((item) => item?.id == parentId, orElse: () => null);
+      final parent = _folders
+          .cast<PdfFolder?>()
+          .firstWhere((item) => item?.id == parentId, orElse: () => null);
       if (parent == null) break;
       names.insert(0, parent.name);
       if (parent.id == 'root') break;
@@ -742,25 +810,22 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
               subtitle: const Text('Criar dentro da pasta atual.'),
               onTap: () {
                 Navigator.of(context).pop();
-                Future<void>.delayed(const Duration(milliseconds: 120), () => _createFolder(ref.read(pdfViewModelProvider).value?.documents ?? const <PdfDocument>[]));
+                Future<void>.delayed(
+                    const Duration(milliseconds: 120),
+                    () => _createFolder(
+                        ref.read(pdfViewModelProvider).value?.documents ??
+                            const <PdfDocument>[]));
               },
             ),
             ListTile(
               leading: const Icon(Icons.file_upload_outlined),
               title: const Text('Buscar PDF no dispositivo'),
-              subtitle: const Text('Selecionar arquivos PDF da pasta Documentos/Downloads.'),
+              subtitle: const Text(
+                  'Selecionar arquivos PDF da pasta Documentos/Downloads.'),
               onTap: () {
                 Navigator.of(context).pop();
-                Future<void>.delayed(const Duration(milliseconds: 120), _importPdfsFromDevice);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.folder_copy_rounded, color: Color(0xFF2E7D32)),
-              title: const Text('Importar pasta com PDFs'),
-              subtitle: const Text('Disponível no desktop; importa apenas PDFs existentes diretamente na pasta.'),
-              onTap: () {
-                Navigator.of(context).pop();
-                Future<void>.delayed(const Duration(milliseconds: 120), _importPdfFolderFromDevice);
+                Future<void>.delayed(
+                    const Duration(milliseconds: 120), _importPdfsFromDevice);
               },
             ),
             ListTile(
@@ -769,7 +834,8 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
               subtitle: const Text('Pesquisar documentos da biblioteca.'),
               onTap: () {
                 Navigator.of(context).pop();
-                Future<void>.delayed(const Duration(milliseconds: 120), _openSearch);
+                Future<void>.delayed(
+                    const Duration(milliseconds: 120), _openSearch);
               },
             ),
             ListTile(
@@ -812,7 +878,8 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
 
   Future<void> _openResetDialog(List<PdfDocument> documents) async {
     final keepDocs = documents.map((doc) => doc.file).toSet();
-    final keepFolders = _folders.map((folder) => folder.id).where((id) => id != 'root').toSet();
+    final keepFolders =
+        _folders.map((folder) => folder.id).where((id) => id != 'root').toSet();
     final result = await showDialog<Map<String, Set<String>>>(
       context: context,
       builder: (context) {
@@ -824,48 +891,205 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
             title: const Text('Resetar configurações'),
             content: SizedBox(
               width: 460,
-              child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text('O reset remove favoritos, páginas salvas, post-its, marcações locais e preferências. Abaixo você escolhe quais PDFs e pastas quer manter visíveis depois do reset.'),
-                const SizedBox(height: 14),
-                Flexible(
-                  child: ListView(shrinkWrap: true, children: [
-                    Text('PDFs a manter', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900)),
-                    for (final doc in documents)
-                      SwitchListTile(
-                        dense: true,
-                        value: selectedDocs.contains(doc.file),
-                        title: Text(doc.title),
-                        subtitle: Text(doc.file, maxLines: 1, overflow: TextOverflow.ellipsis),
-                        onChanged: (value) => setDialogState(() { value ? selectedDocs.add(doc.file) : selectedDocs.remove(doc.file); }),
-                      ),
-                    const Divider(),
-                    Text('Pastas a manter', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900)),
-                    for (final folder in _folders.where((folder) => folder.id != 'root'))
-                      SwitchListTile(
-                        dense: true,
-                        value: selectedFolders.contains(folder.id),
-                        secondary: Icon(Icons.folder_rounded, color: Color(folder.colorValue)),
-                        title: Text(folder.name),
-                        onChanged: (value) => setDialogState(() { value ? selectedFolders.add(folder.id) : selectedFolders.remove(folder.id); }),
-                      ),
+              child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                        'O reset remove favoritos, páginas salvas, post-its, marcações locais e preferências. Abaixo você escolhe quais PDFs e pastas quer manter visíveis depois do reset.'),
+                    const SizedBox(height: 14),
+                    Flexible(
+                      child: ListView(shrinkWrap: true, children: [
+                        Text('PDFs a manter',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(fontWeight: FontWeight.w900)),
+                        for (final doc in documents)
+                          SwitchListTile(
+                            dense: true,
+                            value: selectedDocs.contains(doc.file),
+                            title: Text(doc.title),
+                            subtitle: Text(doc.file,
+                                maxLines: 1, overflow: TextOverflow.ellipsis),
+                            onChanged: (value) => setDialogState(() {
+                              value
+                                  ? selectedDocs.add(doc.file)
+                                  : selectedDocs.remove(doc.file);
+                            }),
+                          ),
+                        const Divider(),
+                        Text('Pastas a manter',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(fontWeight: FontWeight.w900)),
+                        for (final folder
+                            in _folders.where((folder) => folder.id != 'root'))
+                          SwitchListTile(
+                            dense: true,
+                            value: selectedFolders.contains(folder.id),
+                            secondary: Icon(Icons.folder_rounded,
+                                color: Color(folder.colorValue)),
+                            title: Text(folder.name),
+                            onChanged: (value) => setDialogState(() {
+                              value
+                                  ? selectedFolders.add(folder.id)
+                                  : selectedFolders.remove(folder.id);
+                            }),
+                          ),
+                      ]),
+                    ),
                   ]),
-                ),
-              ]),
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancelar')),
-              FilledButton.icon(onPressed: () => Navigator.of(context).pop(<String, Set<String>>{'docs': selectedDocs, 'folders': selectedFolders}), icon: const Icon(Icons.restart_alt_rounded), label: const Text('Resetar')),
+              TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancelar')),
+              FilledButton.icon(
+                  onPressed: () => Navigator.of(context)
+                          .pop(<String, Set<String>>{
+                        'docs': selectedDocs,
+                        'folders': selectedFolders
+                      }),
+                  icon: const Icon(Icons.restart_alt_rounded),
+                  label: const Text('Resetar')),
             ],
           ),
         );
       },
     );
     if (result == null) return;
-    await ref.read(pdfRepositoryProvider).resetApplicationSettings(keepDocumentFiles: result['docs'], keepFolderIds: result['folders']);
+    await ref.read(pdfRepositoryProvider).resetApplicationSettings(
+        keepDocumentFiles: result['docs'], keepFolderIds: result['folders']);
     await _refreshFolders();
     await ref.read(pdfViewModelProvider.notifier).reload();
     if (!mounted) return;
-    _showUndoToast(icon: Icons.restart_alt_rounded, message: 'Configurações resetadas.', actionLabel: 'OK', onUndo: () {});
+    _showUndoToast(
+        icon: Icons.restart_alt_rounded,
+        message: 'Configurações resetadas.',
+        actionLabel: 'OK',
+        onUndo: () {});
+  }
+
+  void _openAboutPage() {
+    showDialog<void>(
+      context: context,
+      builder: (context) => Dialog.fullscreen(
+        child: Scaffold(
+          appBar: AppBar(title: const Text('Sobre o Folhear'), actions: [
+            IconButton(
+                tooltip: 'Fechar',
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.close_rounded))
+          ]),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 32),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 980),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(22),
+                        decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                                colors: [Color(0xFFEAF4FF), Color(0xFFF8FBFF)]),
+                            borderRadius: BorderRadius.circular(30),
+                            border: Border.all(color: const Color(0xFFB8D9FF))),
+                        child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                  width: 64,
+                                  height: 64,
+                                  decoration: const BoxDecoration(
+                                      gradient: LinearGradient(colors: [
+                                        Color(0xFF0B5CAD),
+                                        Color(0xFF2EA7FF)
+                                      ]),
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(22))),
+                                  child: const Icon(
+                                      Icons.picture_as_pdf_rounded,
+                                      color: Colors.white,
+                                      size: 34)),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                  child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                    Text('${AppInfo.name} ${AppInfo.badge}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headlineSmall
+                                            ?.copyWith(
+                                                fontWeight: FontWeight.w900)),
+                                    const SizedBox(height: 8),
+                                    const Text(
+                                        'Biblioteca inteligente para leitura, consulta e organização de documentos PDF, criada para transformar arquivos soltos em uma experiência prática, visual e acessível.'),
+                                    const SizedBox(height: 12),
+                                    Wrap(
+                                        spacing: 10,
+                                        runSpacing: 10,
+                                        children: const [
+                                          _TinyPill(
+                                              icon: Icons.folder_copy_rounded,
+                                              label: 'Pastas'),
+                                          _TinyPill(
+                                              icon: Icons.star_rounded,
+                                              label: 'Favoritos'),
+                                          _TinyPill(
+                                              icon: Icons.sticky_note_2_rounded,
+                                              label: 'Post-its'),
+                                          _TinyPill(
+                                              icon: Icons.search_rounded,
+                                              label: 'Busca'),
+                                          _TinyPill(
+                                              icon: Icons.upload_file_rounded,
+                                              label: 'Importação local'),
+                                        ]),
+                                  ])),
+                            ]),
+                      ),
+                      const SizedBox(height: 18),
+                      _AboutSection(
+                          icon: Icons.account_circle_outlined,
+                          title: 'Desenvolvedor da aplicação',
+                          paragraphs: const [
+                            'Eu, Hagliberto Alves de Oliveira, desenvolvi o Folhear para facilitar minha rotina de consulta, leitura e organização de documentos em PDF. A proposta nasceu da necessidade de reunir materiais importantes em uma biblioteca simples, visual e prática, evitando que arquivos relevantes fiquem espalhados em pastas do computador, downloads do celular ou locais difíceis de localizar rapidamente.',
+                            'O aplicativo foi pensado para uso cotidiano, especialmente em cenários de estudo, trabalho, análise documental e consulta recorrente. A ideia é permitir que o usuário importe seus próprios PDFs, organize por pastas, marque documentos favoritos, salve páginas relevantes e registre observações em post-its, mantendo uma experiência leve e direta.',
+                          ]),
+                      const SizedBox(height: 14),
+                      _AboutSection(
+                          icon: Icons.auto_awesome_rounded,
+                          title: 'Propósito do Folhear',
+                          paragraphs: const [
+                            'O Folhear não é apenas um visualizador de PDF. Ele funciona como uma biblioteca pessoal inteligente, voltada para leitura orientada e organização progressiva. O usuário começa importando arquivos, depois pode separá-los em pastas, destacar documentos importantes, salvar páginas específicas e criar anotações conforme a leitura evolui.',
+                            'A aplicação busca reduzir o tempo gasto procurando documentos e aumentar a produtividade em consultas rápidas. Em vez de depender apenas do nome do arquivo ou da pasta original, o usuário passa a construir uma camada própria de organização, com favoritos, post-its, páginas salvas e agrupamentos personalizados.',
+                          ]),
+                      const SizedBox(height: 14),
+                      _AboutSection(
+                          icon: Icons.new_releases_outlined,
+                          title: 'Versão da aplicação',
+                          paragraphs: const [
+                            '${AppInfo.name} ${AppInfo.version}',
+                            'Atualizada em ${AppInfo.versionDate}.',
+                            'Notas da versão: ${AppInfo.releaseNote}.',
+                            'Esta versão reforça a organização visual das páginas principais, melhora a responsividade do cabeçalho, simplifica a tela de pastas para uma árvore única e transfere as informações de desenvolvedor e versão para uma página própria, mais completa e adequada para consulta.',
+                          ]),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _openMoreSheet() {
@@ -899,52 +1123,53 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
                 title: const Text('Criar pasta'),
                 onTap: () {
                   Navigator.of(context).pop();
-                  Future<void>.delayed(const Duration(milliseconds: 120), () => _createFolder(ref.read(pdfViewModelProvider).value?.documents ?? const <PdfDocument>[]));
+                  Future<void>.delayed(
+                      const Duration(milliseconds: 120),
+                      () => _createFolder(
+                          ref.read(pdfViewModelProvider).value?.documents ??
+                              const <PdfDocument>[]));
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.file_upload_outlined),
                 title: const Text('Importar PDFs do dispositivo'),
-                subtitle: const Text('Seleciona arquivos PDF do armazenamento do aparelho.'),
+                subtitle: const Text(
+                    'Seleciona arquivos PDF do armazenamento do aparelho.'),
                 onTap: () {
                   Navigator.of(context).pop();
-                  Future<void>.delayed(const Duration(milliseconds: 120), _importPdfsFromDevice);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.folder_copy_rounded, color: Color(0xFF2E7D32)),
-                title: const Text('Importar pasta de PDFs'),
-                subtitle: const Text('Disponível no desktop; não varre subpastas.'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  Future<void>.delayed(const Duration(milliseconds: 120), _importPdfFolderFromDevice);
+                  Future<void>.delayed(
+                      const Duration(milliseconds: 120), _importPdfsFromDevice);
                 },
               ),
               const Divider(),
               ListTile(
-                leading: const Icon(Icons.account_circle_outlined),
-                title: const Text('Desenvolvedor da aplicação'),
+                leading: const Icon(Icons.info_outline_rounded),
+                title: const Text('Sobre o Folhear'),
                 subtitle: const Text(
-                  'Eu, Hagliberto Alves de Oliveira, desenvolvi o Folhear para transformar a consulta de documentos em uma experiência mais simples, organizada e móvel. A ideia nasceu da necessidade de reunir PDFs importantes em uma biblioteca leve, com busca, favoritos, pastas, post-its e acesso rápido, reduzindo tempo perdido com arquivos espalhados.',
-                ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.new_releases_outlined),
-                title: const Text('Versão do aplicativo'),
-                subtitle: const Text('${AppInfo.name} ${AppInfo.version} • ${AppInfo.releaseNote} • Atualizada em ${AppInfo.versionDate}'),
+                    'Desenvolvedor, propósito do aplicativo, recursos disponíveis e detalhes completos da versão.'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  Future<void>.delayed(
+                      const Duration(milliseconds: 120), _openAboutPage);
+                },
               ),
               const Divider(),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
                 child: Text(
                   'Versões dos PDFs',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900),
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleSmall
+                      ?.copyWith(fontWeight: FontWeight.w900),
                 ),
               ),
               for (final doc in documents)
                 ListTile(
                   dense: true,
-                  leading: Icon(doc.isLocal ? Icons.upload_file_rounded : Icons.picture_as_pdf_outlined),
+                  leading: Icon(doc.isLocal
+                      ? Icons.upload_file_rounded
+                      : Icons.picture_as_pdf_outlined),
                   title: Text(doc.title),
                   subtitle: Text('${doc.version} • ${doc.pageCount} páginas'),
                 ),
@@ -960,10 +1185,12 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
               ListTile(
                 leading: const Icon(Icons.restart_alt_rounded),
                 title: const Text('Resetar configurações'),
-                subtitle: const Text('Remove favoritos, pastas, PDFs importados, post-its e preferências locais.'),
+                subtitle: const Text(
+                    'Remove favoritos, pastas, PDFs importados, post-its e preferências locais.'),
                 onTap: () {
                   Navigator.of(context).pop();
-                  Future<void>.delayed(const Duration(milliseconds: 120), () => _openResetDialog(documents));
+                  Future<void>.delayed(const Duration(milliseconds: 120),
+                      () => _openResetDialog(documents));
                 },
               ),
             ],
@@ -980,7 +1207,8 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: isMobile ? 50 : 58,
+        toolbarHeight: isMobile ? 56 : 64,
+        titleSpacing: isMobile ? 6 : 12,
         title: const _BrandTitle(),
         actions: [
           Padding(
@@ -988,7 +1216,8 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
             child: _AnimatedFoldersButton(
               onTap: () {
                 final state = ref.read(pdfViewModelProvider).value;
-                _openFoldersBrowserSheet(state?.documents ?? const <PdfDocument>[]);
+                _openFoldersBrowserSheet(
+                    state?.documents ?? const <PdfDocument>[]);
               },
             ),
           ),
@@ -998,15 +1227,22 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
         children: [
           pdfState.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, stackTrace) => Center(child: Text('Erro ao carregar documentos:\n$error', textAlign: TextAlign.center)),
+            error: (error, stackTrace) => Center(
+                child: Text('Erro ao carregar documentos:\n$error',
+                    textAlign: TextAlign.center)),
             data: (state) {
               final selectedFolder = _folders.cast<PdfFolder?>().firstWhere(
                     (folder) => folder?.id == _selectedFolderId,
                     orElse: () => null,
                   );
-              final folderFiles = selectedFolder?.documentFiles.toSet() ?? <String>{};
+              final folderFiles =
+                  selectedFolder?.documentFiles.toSet() ?? <String>{};
               final inRoot = _selectedFolderId == 'root';
-              final documents = inRoot ? state.filteredDocuments : state.filteredDocuments.where((doc) => folderFiles.contains(doc.file)).toList();
+              final documents = inRoot
+                  ? state.filteredDocuments
+                  : state.filteredDocuments
+                      .where((doc) => folderFiles.contains(doc.file))
+                      .toList();
               final isWide = MediaQuery.sizeOf(context).width >= 900;
 
               return SafeArea(
@@ -1015,22 +1251,40 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
                   slivers: [
                     if (_showFoldersPanel)
                       SliverPadding(
-                        padding: EdgeInsets.fromLTRB(isMobile ? 14 : 24, 8, isMobile ? 14 : 24, 14),
+                        padding: EdgeInsets.fromLTRB(
+                            isMobile ? 14 : 24, 8, isMobile ? 14 : 24, 14),
                         sliver: SliverToBoxAdapter(
                           child: _FolderExplorer(
-                          folders: _folders,
-                          selectedFolderId: _selectedFolderId,
-                          treeMode: _showFolderTree,
-                          onSelect: (folder) => setState(() => _selectedFolderId = folder.id),
-                          onCreate: _createFolder,
-                          onRename: _openFolderOptionsSheet,
+                            folders: _folders,
+                            selectedFolderId: _selectedFolderId,
+                            treeMode: _showFolderTree,
+                            onSelect: (folder) =>
+                                setState(() => _selectedFolderId = folder.id),
+                            onCreate: _createFolder,
+                            onRename: _openFolderOptionsSheet,
+                          ),
                         ),
                       ),
-                    ),
                     if (_selectedIndex == 1)
                       SliverPadding(
-                        padding: EdgeInsets.fromLTRB(isMobile ? 14 : 24, 0, isMobile ? 14 : 24, 14),
-                        sliver: SliverToBoxAdapter(child: _FavoritePagesStrip(documents: state.documents)),
+                        padding: EdgeInsets.fromLTRB(
+                            isMobile ? 14 : 24, 0, isMobile ? 14 : 24, 14),
+                        sliver: SliverToBoxAdapter(
+                            child: _FavoritePagesStrip(
+                                documents: state.documents)),
+                      ),
+                    if (documents.isNotEmpty)
+                      SliverPadding(
+                        padding: EdgeInsets.fromLTRB(
+                            isMobile ? 14 : 24, 4, isMobile ? 14 : 24, 14),
+                        sliver: SliverToBoxAdapter(
+                          child: _PageWorkspaceHeader(
+                            favoriteMode: _selectedIndex == 1,
+                            totalDocuments: documents.length,
+                            selectedFolderName:
+                                selectedFolder?.name ?? 'Documentos',
+                          ),
+                        ),
                       ),
                     if (documents.isEmpty)
                       SliverFillRemaining(
@@ -1040,7 +1294,8 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
                             : _RichEmptyState(
                                 icon: Icons.upload_file_rounded,
                                 title: 'Sua biblioteca está vazia no momento',
-                                subtitle: 'Para começar a usar o Folhear, importe um ou mais arquivos PDF do seu dispositivo. Você pode montar uma biblioteca pessoal, separar por pastas e depois marcar itens importantes como favoritos.',
+                                subtitle:
+                                    'Para começar a usar o Folhear, importe um ou mais arquivos PDF do seu dispositivo. Você pode montar uma biblioteca pessoal, separar por pastas e depois marcar itens importantes como favoritos.',
                                 pills: const [
                                   'Toque no botão +',
                                   'Escolha “Buscar PDF no dispositivo”',
@@ -1048,9 +1303,18 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
                                   'Organize em pastas e favoritos',
                                 ],
                                 badges: const [
-                                  _InfoBadgeData(label: 'Importação local', icon: Icons.file_upload_rounded, color: Color(0xFF0B5CAD)),
-                                  _InfoBadgeData(label: 'Suporte a múltiplos PDFs', icon: Icons.picture_as_pdf_rounded, color: Color(0xFFD32F2F)),
-                                  _InfoBadgeData(label: 'Pastas e favoritos', icon: Icons.folder_copy_rounded, color: Color(0xFF2E7D32)),
+                                  _InfoBadgeData(
+                                      label: 'Importação local',
+                                      icon: Icons.file_upload_rounded,
+                                      color: Color(0xFF0B5CAD)),
+                                  _InfoBadgeData(
+                                      label: 'Suporte a múltiplos PDFs',
+                                      icon: Icons.picture_as_pdf_rounded,
+                                      color: Color(0xFFD32F2F)),
+                                  _InfoBadgeData(
+                                      label: 'Pastas e favoritos',
+                                      icon: Icons.folder_copy_rounded,
+                                      color: Color(0xFF2E7D32)),
                                 ],
                                 details: const [
                                   'A biblioteca só passa a exibir documentos depois que você importar arquivos PDF do armazenamento do aparelho ou do computador.',
@@ -1064,7 +1328,8 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
                         padding: const EdgeInsets.fromLTRB(24, 0, 24, 118),
                         sliver: SliverGrid.builder(
                           itemCount: documents.length,
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 3,
                             mainAxisSpacing: 16,
                             crossAxisSpacing: 16,
@@ -1072,10 +1337,14 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
                           ),
                           itemBuilder: (context, index) => _PdfItem(
                             document: documents[index],
-                            onFavorite: () => _toggleDocumentFavorite(documents[index]),
-                            onDelete: () => _deleteDocumentWithUndo(documents[index]),
-                            confirmDelete: () => _confirmDeleteDocument(documents[index]),
-                            onLongPress: () => _openMoveDocumentSheet(documents[index]),
+                            onFavorite: () =>
+                                _toggleDocumentFavorite(documents[index]),
+                            onDelete: () =>
+                                _deleteDocumentWithUndo(documents[index]),
+                            confirmDelete: () =>
+                                _confirmDeleteDocument(documents[index]),
+                            onLongPress: () =>
+                                _openMoveDocumentSheet(documents[index]),
                             onBeforeOpen: _closeSearch,
                           ),
                         ),
@@ -1090,10 +1359,13 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
                             final document = documents[index ~/ 2];
                             return _PdfItem(
                               document: document,
-                              onFavorite: () => _toggleDocumentFavorite(document),
+                              onFavorite: () =>
+                                  _toggleDocumentFavorite(document),
                               onDelete: () => _deleteDocumentWithUndo(document),
-                              confirmDelete: () => _confirmDeleteDocument(document),
-                              onLongPress: () => _openMoveDocumentSheet(document),
+                              confirmDelete: () =>
+                                  _confirmDeleteDocument(document),
+                              onLongPress: () =>
+                                  _openMoveDocumentSheet(document),
                               onBeforeOpen: _closeSearch,
                             );
                           },
@@ -1120,7 +1392,8 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
       bottomNavigationBar: AnimatedPadding(
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOut,
-        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
         child: _HomeBottomArea(
           controller: _searchController,
           focusNode: _searchFocus,
@@ -1128,10 +1401,376 @@ class _PdfHomePageState extends ConsumerState<PdfHomePage> {
           searchOpen: _searchOpen,
           onOpenActions: _openQuickActions,
           onCloseSearch: _closeSearch,
-          onChanged: (value) => ref.read(pdfViewModelProvider.notifier).updateSearch(value),
+          onChanged: (value) =>
+              ref.read(pdfViewModelProvider.notifier).updateSearch(value),
           onNavTap: _onNavTap,
         ),
       ),
+    );
+  }
+}
+
+class _PageWorkspaceHeader extends StatelessWidget {
+  final bool favoriteMode;
+  final int totalDocuments;
+  final String selectedFolderName;
+  const _PageWorkspaceHeader(
+      {required this.favoriteMode,
+      required this.totalDocuments,
+      required this.selectedFolderName});
+  @override
+  Widget build(BuildContext context) {
+    final title = favoriteMode ? 'Favoritos' : 'Biblioteca';
+    final description = favoriteMode
+        ? 'Acesse rapidamente PDFs marcados com estrela e páginas salvas para revisão e consulta recorrente.'
+        : 'Gerencie seus PDFs importados, organize por pastas, abra documentos e marque favoritos para acesso rápido.';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      decoration: BoxDecoration(
+          gradient: const LinearGradient(
+              colors: [Color(0xFFF8FBFF), Color(0xFFEAF4FF)]),
+          borderRadius: BorderRadius.circular(26),
+          border: Border.all(color: const Color(0xFFD4E7FB))),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    colors: favoriteMode
+                        ? const [Color(0xFFFFB300), Color(0xFFFFE082)]
+                        : const [Color(0xFF0B5CAD), Color(0xFF42A5F5)]),
+                borderRadius: BorderRadius.circular(16)),
+            child: Icon(
+                favoriteMode ? Icons.star_rounded : Icons.library_books_rounded,
+                color: Colors.white)),
+        const SizedBox(width: 14),
+        Expanded(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(title,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(fontWeight: FontWeight.w900)),
+          const SizedBox(height: 4),
+          Text(description,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: const Color(0xFF355C7D), height: 1.35)),
+          const SizedBox(height: 10),
+          Wrap(spacing: 8, runSpacing: 8, children: [
+            _TinyPill(
+                icon: Icons.picture_as_pdf_rounded,
+                label: '$totalDocuments PDF(s)'),
+            _TinyPill(icon: Icons.folder_rounded, label: selectedFolderName),
+            _TinyPill(
+                icon:
+                    favoriteMode ? Icons.bolt_rounded : Icons.touch_app_rounded,
+                label: favoriteMode ? 'Acesso rápido' : 'Toque para abrir')
+          ]),
+        ])),
+      ]),
+    );
+  }
+}
+
+class _FoldersPageHeader extends StatelessWidget {
+  final int foldersCount;
+  final int documentsCount;
+  const _FoldersPageHeader(
+      {required this.foldersCount, required this.documentsCount});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+          gradient: const LinearGradient(
+              colors: [Color(0xFFEAF4FF), Color(0xFFF8FBFF)]),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: const Color(0xFFB8D9FF))),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                    colors: [Color(0xFF0B5CAD), Color(0xFF42A5F5)]),
+                borderRadius: BorderRadius.circular(16)),
+            child: const Icon(Icons.account_tree_rounded, color: Colors.white)),
+        const SizedBox(width: 12),
+        Expanded(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text('Pastas da biblioteca',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(fontWeight: FontWeight.w900)),
+          const SizedBox(height: 4),
+          const Text(
+              'Visualização em árvore para organizar e filtrar seus PDFs por assunto, estudo, trabalho ou qualquer categoria pessoal.',
+              style: TextStyle(color: Color(0xFF355C7D))),
+          const SizedBox(height: 8),
+          Wrap(spacing: 8, runSpacing: 8, children: [
+            _TinyPill(
+                icon: Icons.folder_open_rounded,
+                label: '$foldersCount pasta(s)'),
+            _TinyPill(
+                icon: Icons.picture_as_pdf_rounded,
+                label: '$documentsCount PDF(s)'),
+            const _TinyPill(icon: Icons.account_tree_rounded, label: 'Árvore')
+          ]),
+        ])),
+      ]),
+    );
+  }
+}
+
+class _FolderFormSection extends StatelessWidget {
+  final TextEditingController nameController;
+  final List<Color> colors;
+  final Color selectedColor;
+  final ValueChanged<Color> onColorChanged;
+
+  const _FolderFormSection({
+    required this.nameController,
+    required this.colors,
+    required this.selectedColor,
+    required this.onColorChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFD9EAF9)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: nameController,
+            decoration: const InputDecoration(
+              labelText: 'Nome da pasta',
+              hintText: 'Ex.: Estudos, Trabalho, Contratos...',
+              prefixIcon: Icon(Icons.folder_open_rounded),
+            ),
+          ),
+          const SizedBox(height: 14),
+          Text('Cor da pasta',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleSmall
+                  ?.copyWith(fontWeight: FontWeight.w800)),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              for (final color in colors)
+                InkWell(
+                  borderRadius: BorderRadius.circular(999),
+                  onTap: () => onColorChanged(color),
+                  child: CircleAvatar(
+                    backgroundColor: color,
+                    child: selectedColor.toARGB32() == color.toARGB32()
+                        ? const Icon(Icons.check, color: Colors.white)
+                        : null,
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FolderDocumentsSection extends StatelessWidget {
+  final List<PdfDocument> availableDocuments;
+  final Set<String> selectedFiles;
+  final void Function(String file, bool selected) onToggleFile;
+
+  const _FolderDocumentsSection({
+    required this.availableDocuments,
+    required this.selectedFiles,
+    required this.onToggleFile,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFD9EAF9)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('PDFs vinculados',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleSmall
+                  ?.copyWith(fontWeight: FontWeight.w800)),
+          const SizedBox(height: 10),
+          if (availableDocuments.isEmpty)
+            const Text('Nenhum PDF disponível para vincular no momento.')
+          else
+            SizedBox(
+              height: 320,
+              child: ListView.builder(
+                itemCount: availableDocuments.length,
+                itemBuilder: (context, index) {
+                  final document = availableDocuments[index];
+                  final selected = selectedFiles.contains(document.file);
+                  return CheckboxListTile(
+                    dense: true,
+                    value: selected,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(document.title,
+                        maxLines: 1, overflow: TextOverflow.ellipsis),
+                    subtitle: Text(document.file,
+                        maxLines: 1, overflow: TextOverflow.ellipsis),
+                    onChanged: (value) =>
+                        onToggleFile(document.file, value ?? false),
+                  );
+                },
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FolderTreeTile extends StatelessWidget {
+  final PdfFolder folder;
+  final int depth;
+  final bool selected;
+  final String path;
+  final VoidCallback onTap;
+  final VoidCallback onOptions;
+
+  const _FolderTreeTile({
+    required this.folder,
+    required this.depth,
+    required this.selected,
+    required this.path,
+    required this.onTap,
+    required this.onOptions,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Color(folder.colorValue);
+    return Padding(
+      padding: EdgeInsets.only(left: (depth * 16).toDouble()),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          onLongPress: onOptions,
+          child: Ink(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: selected ? const Color(0xFFEAF4FF) : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border:
+                  Border.all(color: selected ? color : const Color(0xFFD9EAF9)),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                    folder.id == 'root'
+                        ? Icons.home_filled
+                        : Icons.folder_rounded,
+                    color: color),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(folder.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontWeight: FontWeight.w800)),
+                      const SizedBox(height: 2),
+                      Text(path,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                              fontSize: 12, color: Color(0xFF546E7A))),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  onPressed: onOptions,
+                  icon: const Icon(Icons.more_horiz_rounded),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AboutSection extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final List<String> paragraphs;
+  const _AboutSection(
+      {required this.icon, required this.title, required this.paragraphs});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: const Color(0xFFD7E7F7)),
+          boxShadow: [
+            BoxShadow(
+                color: const Color(0xFF0B5CAD).withOpacity(0.05),
+                blurRadius: 14,
+                offset: const Offset(0, 6))
+          ]),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                  color: const Color(0xFFEAF4FF),
+                  borderRadius: BorderRadius.circular(14)),
+              child: Icon(icon, color: const Color(0xFF0B5CAD))),
+          const SizedBox(width: 12),
+          Expanded(
+              child: Text(title,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(fontWeight: FontWeight.w900)))
+        ]),
+        const SizedBox(height: 12),
+        for (final paragraph in paragraphs)
+          Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Text(paragraph,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      height: 1.48, color: const Color(0xFF263238)))),
+      ]),
     );
   }
 }
@@ -1142,41 +1781,102 @@ class _BrandTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Row(
-      children: [
-        Container(
-          width: 38,
-          height: 38,
-          decoration: BoxDecoration(color: scheme.primaryContainer, borderRadius: BorderRadius.circular(14)),
-          child: Icon(Icons.picture_as_pdf_rounded, color: scheme.primary),
+    final width = MediaQuery.sizeOf(context).width;
+    final compact = width < 430;
+    final veryCompact = width < 360;
+    final iconSize = veryCompact
+        ? 32.0
+        : compact
+            ? 36.0
+            : 42.0;
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+          maxWidth: veryCompact
+              ? 170
+              : compact
+                  ? 220
+                  : 330),
+      child: Container(
+        padding: EdgeInsets.symmetric(
+            horizontal: compact ? 6 : 10, vertical: compact ? 5 : 7),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+              colors: [Color(0xFFF9FBFF), Color(0xFFEEF6FF)]),
+          borderRadius: BorderRadius.circular(compact ? 16 : 20),
+          border: Border.all(color: const Color(0xFFD4E7FB)),
         ),
-        const SizedBox(width: 10),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(AppInfo.name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: [scheme.primary, const Color(0xFF2EA7FF)]),
-                    borderRadius: BorderRadius.circular(999),
-                    boxShadow: [BoxShadow(color: scheme.primary.withOpacity(0.25), blurRadius: 12, offset: const Offset(0, 4))],
-                  ),
-                  child: const Text(
-                    AppInfo.badge,
-                    style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.8),
-                  ),
-                ),
-              ],
+            Container(
+              width: iconSize,
+              height: iconSize,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    colors: [scheme.primary, const Color(0xFF2EA7FF)]),
+                borderRadius: BorderRadius.circular(compact ? 12 : 15),
+                boxShadow: [
+                  BoxShadow(
+                      color: scheme.primary.withOpacity(0.18),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4))
+                ],
+              ),
+              child: Icon(Icons.picture_as_pdf_rounded,
+                  color: Colors.white, size: compact ? 19 : 23),
             ),
-            Text('Consulta rápida', style: Theme.of(context).textTheme.labelMedium?.copyWith(color: scheme.primary)),
+            SizedBox(width: compact ? 7 : 10),
+            Flexible(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: ShaderMask(
+                      shaderCallback: (bounds) => const LinearGradient(colors: [
+                        Color(0xFF0B315E),
+                        Color(0xFF0B5CAD),
+                        Color(0xFF2EA7FF)
+                      ]).createShader(bounds),
+                      child: Text(
+                        AppInfo.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: (compact
+                                ? Theme.of(context).textTheme.titleMedium
+                                : Theme.of(context).textTheme.titleLarge)
+                            ?.copyWith(
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                letterSpacing: 0.2),
+                      ),
+                    ),
+                  ),
+                  if (!veryCompact) ...[
+                    const SizedBox(width: 7),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: compact ? 7 : 10,
+                          vertical: compact ? 2 : 4),
+                      decoration: BoxDecoration(
+                          gradient: LinearGradient(colors: [
+                            scheme.primary,
+                            const Color(0xFF2EA7FF)
+                          ]),
+                          borderRadius: BorderRadius.circular(999)),
+                      child: Text(AppInfo.badge,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: compact ? 9 : 10,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.7)),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ],
         ),
-      ],
+      ),
     );
   }
 }
@@ -1194,6 +1894,7 @@ class _AnimatedFoldersButtonState extends State<_AnimatedFoldersButton> {
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 430;
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
@@ -1202,19 +1903,33 @@ class _AnimatedFoldersButtonState extends State<_AnimatedFoldersButton> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: EdgeInsets.symmetric(
+              horizontal: compact ? 9 : 12, vertical: compact ? 7 : 8),
           decoration: BoxDecoration(
-            gradient: LinearGradient(colors: _hovered ? [const Color(0xFFEAF4FF), const Color(0xFFD9EEFF)] : [const Color(0xFFF5FAFF), const Color(0xFFEAF4FF)]),
-            borderRadius: BorderRadius.circular(18),
+            gradient: LinearGradient(
+                colors: _hovered
+                    ? [const Color(0xFFEAF4FF), const Color(0xFFD9EEFF)]
+                    : [const Color(0xFFF5FAFF), const Color(0xFFEAF4FF)]),
+            borderRadius: BorderRadius.circular(compact ? 15 : 18),
             border: Border.all(color: const Color(0xFFB8D9FF)),
-            boxShadow: [BoxShadow(color: const Color(0xFF0B5CAD).withOpacity(_hovered ? 0.20 : 0.10), blurRadius: _hovered ? 18 : 10, offset: const Offset(0, 6))],
+            boxShadow: [
+              BoxShadow(
+                  color: const Color(0xFF0B5CAD)
+                      .withOpacity(_hovered ? 0.18 : 0.08),
+                  blurRadius: _hovered ? 16 : 8,
+                  offset: const Offset(0, 5))
+            ],
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
-            children: const [
-              Icon(Icons.folder_copy_rounded, color: Color(0xFF0B5CAD)),
-              SizedBox(width: 8),
-              Text('Pastas', style: TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF0B315E))),
+            children: [
+              const Icon(Icons.folder_copy_rounded, color: Color(0xFF0B5CAD)),
+              if (!compact) ...[
+                const SizedBox(width: 8),
+                const Text('Pastas',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w900, color: Color(0xFF0B315E))),
+              ],
             ],
           ),
         ),
@@ -1231,7 +1946,13 @@ class _FolderGridCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onOptions;
 
-  const _FolderGridCard({required this.folder, required this.selected, required this.treeMode, required this.path, required this.onTap, required this.onOptions});
+  const _FolderGridCard(
+      {required this.folder,
+      required this.selected,
+      required this.treeMode,
+      required this.path,
+      required this.onTap,
+      required this.onOptions});
 
   @override
   Widget build(BuildContext context) {
@@ -1239,10 +1960,20 @@ class _FolderGridCard extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 180),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: selected ? [color.withOpacity(0.18), color.withOpacity(0.08)] : [Colors.white, const Color(0xFFF8FBFF)]),
+        gradient: LinearGradient(
+            colors: selected
+                ? [color.withOpacity(0.18), color.withOpacity(0.08)]
+                : [Colors.white, const Color(0xFFF8FBFF)]),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: selected ? color.withOpacity(0.7) : const Color(0xFFD9EAF9), width: selected ? 1.4 : 1),
-        boxShadow: [BoxShadow(color: color.withOpacity(selected ? 0.18 : 0.08), blurRadius: selected ? 18 : 12, offset: const Offset(0, 8))],
+        border: Border.all(
+            color: selected ? color.withOpacity(0.7) : const Color(0xFFD9EAF9),
+            width: selected ? 1.4 : 1),
+        boxShadow: [
+          BoxShadow(
+              color: color.withOpacity(selected ? 0.18 : 0.08),
+              blurRadius: selected ? 18 : 12,
+              offset: const Offset(0, 8))
+        ],
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(24),
@@ -1258,24 +1989,51 @@ class _FolderGridCard extends StatelessWidget {
                   Container(
                     width: 42,
                     height: 42,
-                    decoration: BoxDecoration(color: color.withOpacity(0.16), borderRadius: BorderRadius.circular(14)),
-                    child: Icon(folder.id == 'root' ? Icons.home_filled : Icons.folder_rounded, color: color),
+                    decoration: BoxDecoration(
+                        color: color.withOpacity(0.16),
+                        borderRadius: BorderRadius.circular(14)),
+                    child: Icon(
+                        folder.id == 'root'
+                            ? Icons.home_filled
+                            : Icons.folder_rounded,
+                        color: color),
                   ),
                   const Spacer(),
-                  IconButton(visualDensity: VisualDensity.compact, onPressed: onOptions, icon: const Icon(Icons.more_horiz_rounded)),
+                  IconButton(
+                      visualDensity: VisualDensity.compact,
+                      onPressed: onOptions,
+                      icon: const Icon(Icons.more_horiz_rounded)),
                 ],
               ),
               const SizedBox(height: 8),
-              Text(folder.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900)),
+              Text(folder.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleSmall
+                      ?.copyWith(fontWeight: FontWeight.w900)),
               const SizedBox(height: 6),
-              Text(path, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: const Color(0xFF546E7A))),
+              Text(path,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: const Color(0xFF546E7A))),
               const Spacer(),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _TinyPill(icon: Icons.picture_as_pdf_rounded, label: '${folder.documentFiles.length} PDF(s)'),
-                  _TinyPill(icon: treeMode ? Icons.account_tree_rounded : Icons.grid_view_rounded, label: treeMode ? 'Árvore' : 'Coluna'),
+                  _TinyPill(
+                      icon: Icons.picture_as_pdf_rounded,
+                      label: '${folder.documentFiles.length} PDF(s)'),
+                  _TinyPill(
+                      icon: treeMode
+                          ? Icons.account_tree_rounded
+                          : Icons.grid_view_rounded,
+                      label: treeMode ? 'Árvore' : 'Coluna'),
                 ],
               ),
             ],
@@ -1290,7 +2048,8 @@ class _InfoBadgeData {
   final String label;
   final IconData icon;
   final Color color;
-  const _InfoBadgeData({required this.label, required this.icon, required this.color});
+  const _InfoBadgeData(
+      {required this.label, required this.icon, required this.color});
 }
 
 class _RichEmptyState extends StatelessWidget {
@@ -1301,7 +2060,13 @@ class _RichEmptyState extends StatelessWidget {
   final List<_InfoBadgeData> badges;
   final List<String> details;
 
-  const _RichEmptyState({required this.icon, required this.title, required this.subtitle, required this.pills, required this.badges, required this.details});
+  const _RichEmptyState(
+      {required this.icon,
+      required this.title,
+      required this.subtitle,
+      required this.pills,
+      required this.badges,
+      required this.details});
 
   @override
   Widget build(BuildContext context) {
@@ -1313,10 +2078,16 @@ class _RichEmptyState extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [Color(0xFFF7FBFF), Color(0xFFEAF4FF)]),
+              gradient: const LinearGradient(
+                  colors: [Color(0xFFF7FBFF), Color(0xFFEAF4FF)]),
               borderRadius: BorderRadius.circular(32),
               border: Border.all(color: const Color(0xFFB8D9FF)),
-              boxShadow: [BoxShadow(color: const Color(0xFF0B5CAD).withOpacity(0.10), blurRadius: 28, offset: const Offset(0, 14))],
+              boxShadow: [
+                BoxShadow(
+                    color: const Color(0xFF0B5CAD).withOpacity(0.10),
+                    blurRadius: 28,
+                    offset: const Offset(0, 14))
+              ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -1329,9 +2100,15 @@ class _RichEmptyState extends StatelessWidget {
                       width: 66,
                       height: 66,
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(colors: [Color(0xFF0B5CAD), Color(0xFF42A5F5)]),
+                        gradient: const LinearGradient(
+                            colors: [Color(0xFF0B5CAD), Color(0xFF42A5F5)]),
                         borderRadius: BorderRadius.circular(22),
-                        boxShadow: [BoxShadow(color: const Color(0xFF0B5CAD).withOpacity(0.20), blurRadius: 18, offset: const Offset(0, 8))],
+                        boxShadow: [
+                          BoxShadow(
+                              color: const Color(0xFF0B5CAD).withOpacity(0.20),
+                              blurRadius: 18,
+                              offset: const Offset(0, 8))
+                        ],
                       ),
                       child: Icon(icon, size: 32, color: Colors.white),
                     ),
@@ -1340,18 +2117,32 @@ class _RichEmptyState extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(title, style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900)),
+                          Text(title,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineSmall
+                                  ?.copyWith(fontWeight: FontWeight.w900)),
                           const SizedBox(height: 8),
-                          Text(subtitle, style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.4)),
+                          Text(subtitle,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyLarge
+                                  ?.copyWith(height: 1.4)),
                         ],
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 18),
-                Wrap(spacing: 10, runSpacing: 10, children: [for (final pill in pills) _TinyPill(icon: Icons.check_circle_outline_rounded, label: pill)]),
+                Wrap(spacing: 10, runSpacing: 10, children: [
+                  for (final pill in pills)
+                    _TinyPill(
+                        icon: Icons.check_circle_outline_rounded, label: pill)
+                ]),
                 const SizedBox(height: 14),
-                Wrap(spacing: 10, runSpacing: 10, children: [for (final badge in badges) _InfoBadge(badge: badge)]),
+                Wrap(spacing: 10, runSpacing: 10, children: [
+                  for (final badge in badges) _InfoBadge(badge: badge)
+                ]),
                 const SizedBox(height: 18),
                 ...details.map((detail) => Padding(
                       padding: const EdgeInsets.only(bottom: 10),
@@ -1360,10 +2151,16 @@ class _RichEmptyState extends StatelessWidget {
                         children: [
                           const Padding(
                             padding: EdgeInsets.only(top: 2),
-                            child: Icon(Icons.arrow_right_rounded, color: Color(0xFF0B5CAD)),
+                            child: Icon(Icons.arrow_right_rounded,
+                                color: Color(0xFF0B5CAD)),
                           ),
                           const SizedBox(width: 6),
-                          Expanded(child: Text(detail, style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.4))),
+                          Expanded(
+                              child: Text(detail,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(height: 1.4))),
                         ],
                       ),
                     )),
@@ -1389,7 +2186,9 @@ class _FavoritesEmptyState extends ConsumerWidget {
         final hasFavoritePages = favoritePages.isNotEmpty;
         return _RichEmptyState(
           icon: Icons.star_rounded,
-          title: hasFavoritePages ? 'Você ainda não favoritou documentos completos' : 'Sua área de favoritos está vazia',
+          title: hasFavoritePages
+              ? 'Você ainda não favoritou documentos completos'
+              : 'Sua área de favoritos está vazia',
           subtitle: hasFavoritePages
               ? 'Você já salvou páginas favoritas, mas ainda não marcou documentos inteiros como favoritos. Toque na estrela de qualquer PDF para destacar o documento completo e facilitar o acesso futuro.'
               : 'Marque documentos ou páginas como favoritos para montar um atalho pessoal com os conteúdos mais importantes. Assim você encontra rapidamente seus materiais principais dentro do Folhear.',
@@ -1407,9 +2206,18 @@ class _FavoritesEmptyState extends ConsumerWidget {
                   'Use favoritos para estudo e revisão',
                 ],
           badges: const [
-            _InfoBadgeData(label: 'Favoritos de documentos', icon: Icons.star_rounded, color: Color(0xFFFFA000)),
-            _InfoBadgeData(label: 'Páginas salvas', icon: Icons.bookmark_added_rounded, color: Color(0xFF2E7D32)),
-            _InfoBadgeData(label: 'Acesso rápido', icon: Icons.bolt_rounded, color: Color(0xFF5E35B1)),
+            _InfoBadgeData(
+                label: 'Favoritos de documentos',
+                icon: Icons.star_rounded,
+                color: Color(0xFFFFA000)),
+            _InfoBadgeData(
+                label: 'Páginas salvas',
+                icon: Icons.bookmark_added_rounded,
+                color: Color(0xFF2E7D32)),
+            _InfoBadgeData(
+                label: 'Acesso rápido',
+                icon: Icons.bolt_rounded,
+                color: Color(0xFF5E35B1)),
           ],
           details: hasFavoritePages
               ? const [
@@ -1436,13 +2244,18 @@ class _InfoBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(color: badge.color.withOpacity(0.10), borderRadius: BorderRadius.circular(999), border: Border.all(color: badge.color.withOpacity(0.28))),
+      decoration: BoxDecoration(
+          color: badge.color.withOpacity(0.10),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: badge.color.withOpacity(0.28))),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(badge.icon, size: 16, color: badge.color),
           const SizedBox(width: 8),
-          Text(badge.label, style: TextStyle(fontWeight: FontWeight.w800, color: badge.color)),
+          Text(badge.label,
+              style:
+                  TextStyle(fontWeight: FontWeight.w800, color: badge.color)),
         ],
       ),
     );
@@ -1458,13 +2271,18 @@ class _TinyPill extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(999), border: Border.all(color: const Color(0xFFD8E6F3))),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: const Color(0xFFD8E6F3))),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 16, color: const Color(0xFF0B5CAD)),
           const SizedBox(width: 6),
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w800, color: Color(0xFF355C7D))),
+          Text(label,
+              style: const TextStyle(
+                  fontWeight: FontWeight.w800, color: Color(0xFF355C7D))),
         ],
       ),
     );
@@ -1482,7 +2300,8 @@ class _HeroHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [scheme.primaryContainer, scheme.surfaceContainerHighest]),
+        gradient: LinearGradient(
+            colors: [scheme.primaryContainer, scheme.surfaceContainerHighest]),
         borderRadius: BorderRadius.circular(28),
       ),
       child: Column(
@@ -1490,10 +2309,15 @@ class _HeroHeader extends StatelessWidget {
         children: [
           Text(
             favoriteMode ? 'Favoritos' : 'Biblioteca',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900, color: scheme.onPrimaryContainer),
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w900, color: scheme.onPrimaryContainer),
           ),
           const SizedBox(height: 4),
-          Text('$total documento(s) importado(s)', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: scheme.onPrimaryContainer)),
+          Text('$total documento(s) importado(s)',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: scheme.onPrimaryContainer)),
         ],
       ),
     );
@@ -1519,10 +2343,18 @@ class _FolderExplorer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final visibleFolders = treeMode ? folders : folders.where((folder) => folder.parentId == selectedFolderId || folder.id == 'root').toList();
+    final visibleFolders = treeMode
+        ? folders
+        : folders
+            .where((folder) =>
+                folder.parentId == selectedFolderId || folder.id == 'root')
+            .toList();
     return Card(
       elevation: 0,
-      color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.62),
+      color: Theme.of(context)
+          .colorScheme
+          .surfaceContainerHighest
+          .withOpacity(0.62),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -1531,12 +2363,23 @@ class _FolderExplorer extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(treeMode ? Icons.account_tree_rounded : Icons.folder_open_rounded, color: Theme.of(context).colorScheme.primary),
+                Icon(
+                    treeMode
+                        ? Icons.account_tree_rounded
+                        : Icons.folder_open_rounded,
+                    color: Theme.of(context).colorScheme.primary),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(treeMode ? 'Árvore de pastas' : 'Pastas', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900)),
+                  child: Text(treeMode ? 'Árvore de pastas' : 'Pastas',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleSmall
+                          ?.copyWith(fontWeight: FontWeight.w900)),
                 ),
-                IconButton(tooltip: 'Criar pasta', onPressed: onCreate, icon: const Icon(Icons.create_new_folder_rounded)),
+                IconButton(
+                    tooltip: 'Criar pasta',
+                    onPressed: onCreate,
+                    icon: const Icon(Icons.create_new_folder_rounded)),
               ],
             ),
             const SizedBox(height: 8),
@@ -1547,8 +2390,13 @@ class _FolderExplorer extends StatelessWidget {
                       children: [
                         for (final folder in folders)
                           Padding(
-                            padding: EdgeInsets.only(left: folder.parentId == null ? 0 : 18),
-                            child: _FolderChip(folder: folder, selected: folder.id == selectedFolderId, onTap: () => onSelect(folder), onLongPress: () => onRename(folder)),
+                            padding: EdgeInsets.only(
+                                left: folder.parentId == null ? 0 : 18),
+                            child: _FolderChip(
+                                folder: folder,
+                                selected: folder.id == selectedFolderId,
+                                onTap: () => onSelect(folder),
+                                onLongPress: () => onRename(folder)),
                           ),
                       ],
                     )
@@ -1558,7 +2406,11 @@ class _FolderExplorer extends StatelessWidget {
                       separatorBuilder: (_, __) => const SizedBox(width: 8),
                       itemBuilder: (context, index) {
                         final folder = visibleFolders[index];
-                        return _FolderChip(folder: folder, selected: folder.id == selectedFolderId, onTap: () => onSelect(folder), onLongPress: () => onRename(folder));
+                        return _FolderChip(
+                            folder: folder,
+                            selected: folder.id == selectedFolderId,
+                            onTap: () => onSelect(folder),
+                            onLongPress: () => onRename(folder));
                       },
                     ),
             ),
@@ -1575,7 +2427,11 @@ class _FolderChip extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onLongPress;
 
-  const _FolderChip({required this.folder, required this.selected, required this.onTap, required this.onLongPress});
+  const _FolderChip(
+      {required this.folder,
+      required this.selected,
+      required this.onTap,
+      required this.onLongPress});
 
   @override
   Widget build(BuildContext context) {
@@ -1583,7 +2439,12 @@ class _FolderChip extends StatelessWidget {
       onLongPress: onLongPress,
       child: FilterChip(
         selected: selected,
-        avatar: Icon(folder.id == 'root' ? Icons.folder_special_rounded : Icons.folder_rounded, size: 18, color: Color(folder.colorValue)),
+        avatar: Icon(
+            folder.id == 'root'
+                ? Icons.folder_special_rounded
+                : Icons.folder_rounded,
+            size: 18,
+            color: Color(folder.colorValue)),
         label: Text(folder.name),
         onSelected: (_) => onTap(),
         visualDensity: VisualDensity.compact,
@@ -1600,13 +2461,20 @@ class _PdfItem extends StatelessWidget {
   final VoidCallback onLongPress;
   final VoidCallback? onBeforeOpen;
 
-  const _PdfItem({required this.document, required this.onFavorite, required this.onDelete, required this.confirmDelete, required this.onLongPress, this.onBeforeOpen});
+  const _PdfItem(
+      {required this.document,
+      required this.onFavorite,
+      required this.onDelete,
+      required this.confirmDelete,
+      required this.onLongPress,
+      this.onBeforeOpen});
 
   @override
   Widget build(BuildContext context) {
     void openDocument() {
       onBeforeOpen?.call();
-      Navigator.of(context).push(MaterialPageRoute(builder: (_) => PdfViewerPage(document: document)));
+      Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => PdfViewerPage(document: document)));
     }
 
     return Dismissible(
@@ -1620,12 +2488,17 @@ class _PdfItem extends StatelessWidget {
         return confirmDelete();
       },
       onDismissed: (_) async => onDelete(),
-      background: _SwipeFavoriteBackground(isFavorite: document.isFavorite, alignment: Alignment.centerLeft),
+      background: _SwipeFavoriteBackground(
+          isFavorite: document.isFavorite, alignment: Alignment.centerLeft),
       secondaryBackground: const _SwipeDeleteBackground(),
       child: AnimatedScale(
         duration: const Duration(milliseconds: 180),
         scale: 1,
-        child: PdfCard(document: document, onFavoriteTap: onFavorite, onOpenTap: openDocument, onLongPress: onLongPress),
+        child: PdfCard(
+            document: document,
+            onFavoriteTap: onFavorite,
+            onOpenTap: openDocument,
+            onLongPress: onLongPress),
       ),
     );
   }
@@ -1639,7 +2512,9 @@ class _SwipeDeleteBackground extends StatelessWidget {
     return Container(
       alignment: Alignment.centerRight,
       padding: const EdgeInsets.symmetric(horizontal: 22),
-      decoration: BoxDecoration(color: scheme.errorContainer, borderRadius: BorderRadius.circular(18)),
+      decoration: BoxDecoration(
+          color: scheme.errorContainer,
+          borderRadius: BorderRadius.circular(18)),
       child: Icon(Icons.delete_outline_rounded, color: scheme.onErrorContainer),
     );
   }
@@ -1649,7 +2524,8 @@ class _SwipeFavoriteBackground extends StatelessWidget {
   final bool isFavorite;
   final Alignment alignment;
 
-  const _SwipeFavoriteBackground({required this.isFavorite, required this.alignment});
+  const _SwipeFavoriteBackground(
+      {required this.isFavorite, required this.alignment});
 
   @override
   Widget build(BuildContext context) {
@@ -1657,8 +2533,12 @@ class _SwipeFavoriteBackground extends StatelessWidget {
     return Container(
       alignment: alignment,
       padding: const EdgeInsets.symmetric(horizontal: 22),
-      decoration: BoxDecoration(color: isFavorite ? scheme.errorContainer : scheme.primaryContainer, borderRadius: BorderRadius.circular(18)),
-      child: Icon(isFavorite ? Icons.star_border_rounded : Icons.star_rounded, color: isFavorite ? scheme.onErrorContainer : scheme.onPrimaryContainer),
+      decoration: BoxDecoration(
+          color: isFavorite ? scheme.errorContainer : scheme.primaryContainer,
+          borderRadius: BorderRadius.circular(18)),
+      child: Icon(isFavorite ? Icons.star_border_rounded : Icons.star_rounded,
+          color:
+              isFavorite ? scheme.onErrorContainer : scheme.onPrimaryContainer),
     );
   }
 }
@@ -1679,7 +2559,11 @@ class _FavoritePagesStrip extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Páginas salvas', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800)),
+            Text('Páginas salvas',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w800)),
             const SizedBox(height: 10),
             SizedBox(
               height: 132,
@@ -1691,7 +2575,12 @@ class _FavoritePagesStrip extends ConsumerWidget {
                   final item = items[index];
                   final doc = documents.firstWhere(
                     (doc) => doc.file == item.file,
-                    orElse: () => PdfDocument(file: item.file, title: item.title, description: '', version: 'v1.0', pageCount: item.page),
+                    orElse: () => PdfDocument(
+                        file: item.file,
+                        title: item.title,
+                        description: '',
+                        version: 'v1.0',
+                        pageCount: item.page),
                   );
 
                   return SizedBox(
@@ -1700,18 +2589,32 @@ class _FavoritePagesStrip extends ConsumerWidget {
                       clipBehavior: Clip.antiAlias,
                       child: InkWell(
                         onLongPress: () async {
-                          await ref.read(pdfRepositoryProvider).togglePageFavorite(document: doc, page: item.page);
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Página removida dos favoritos.')));
+                          await ref
+                              .read(pdfRepositoryProvider)
+                              .togglePageFavorite(
+                                  document: doc, page: item.page);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content:
+                                      Text('Página removida dos favoritos.')));
                         },
-                        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => PdfViewerPage(document: doc, initialPage: item.page))),
+                        onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (_) => PdfViewerPage(
+                                    document: doc, initialPage: item.page))),
                         child: Padding(
                           padding: const EdgeInsets.all(12),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Chip(avatar: const Icon(Icons.bookmark, size: 16), label: Text('${item.title} • pág. ${item.page}'), visualDensity: VisualDensity.compact),
+                              Chip(
+                                  avatar: const Icon(Icons.bookmark, size: 16),
+                                  label:
+                                      Text('${item.title} • pág. ${item.page}'),
+                                  visualDensity: VisualDensity.compact),
                               const SizedBox(height: 6),
-                              Text(item.preview, maxLines: 3, overflow: TextOverflow.ellipsis),
+                              Text(item.preview,
+                                  maxLines: 3, overflow: TextOverflow.ellipsis),
                             ],
                           ),
                         ),
@@ -1774,7 +2677,12 @@ class _HomeBottomArea extends StatelessWidget {
                           leading: const Icon(Icons.search),
                           hintText: 'Pesquisar documentos',
                           onChanged: onChanged,
-                          trailing: [IconButton(tooltip: 'Fechar busca', icon: const Icon(Icons.close), onPressed: onCloseSearch)],
+                          trailing: [
+                            IconButton(
+                                tooltip: 'Fechar busca',
+                                icon: const Icon(Icons.close),
+                                onPressed: onCloseSearch)
+                          ],
                         ),
                       )
                     : FloatingActionButton.small(
@@ -1782,7 +2690,8 @@ class _HomeBottomArea extends StatelessWidget {
                         heroTag: 'home-actions-button',
                         tooltip: 'Ações rápidas',
                         onPressed: onOpenActions,
-                        child: const Icon(Icons.add_rounded, color: Color(0xFF0D47A1)),
+                        child: const Icon(Icons.add_rounded,
+                            color: Color(0xFF0D47A1)),
                       ),
               ),
               const SizedBox(height: 6),
@@ -1791,9 +2700,24 @@ class _HomeBottomArea extends StatelessWidget {
                 selectedIndex: selectedIndex,
                 onDestinationSelected: onNavTap,
                 destinations: const [
-                  NavigationDestination(icon: Icon(Icons.menu_book_outlined, color: Color(0xFF1565C0)), selectedIcon: Icon(Icons.menu_book_rounded, color: Color(0xFF0D47A1)), label: 'Biblioteca'),
-                  NavigationDestination(icon: Icon(Icons.star_border_rounded, color: Color(0xFFFFA000)), selectedIcon: Icon(Icons.star_rounded, color: Color(0xFFFFA000)), label: 'Favoritos'),
-                  NavigationDestination(icon: Icon(Icons.more_horiz_rounded, color: Color(0xFF5E35B1)), selectedIcon: Icon(Icons.more_horiz_rounded, color: Color(0xFF5E35B1)), label: 'Mais'),
+                  NavigationDestination(
+                      icon: Icon(Icons.menu_book_outlined,
+                          color: Color(0xFF1565C0)),
+                      selectedIcon: Icon(Icons.menu_book_rounded,
+                          color: Color(0xFF0D47A1)),
+                      label: 'Biblioteca'),
+                  NavigationDestination(
+                      icon: Icon(Icons.star_border_rounded,
+                          color: Color(0xFFFFA000)),
+                      selectedIcon:
+                          Icon(Icons.star_rounded, color: Color(0xFFFFA000)),
+                      label: 'Favoritos'),
+                  NavigationDestination(
+                      icon: Icon(Icons.more_horiz_rounded,
+                          color: Color(0xFF5E35B1)),
+                      selectedIcon: Icon(Icons.more_horiz_rounded,
+                          color: Color(0xFF5E35B1)),
+                      label: 'Mais'),
                 ],
               ),
             ],

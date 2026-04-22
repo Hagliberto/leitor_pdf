@@ -1913,11 +1913,12 @@ class _NativePdfViewer extends StatelessWidget {
 
         return SfPdfViewer.memory(
           snapshot.data!,
+          key: ValueKey('native-pdf-${isHorizontalNavigation ? 'horizontal' : 'vertical'}'),
           controller: pdfController,
           canShowScrollHead: true,
           canShowScrollStatus: true,
           enableDoubleTapZooming: true,
-          pageLayoutMode: PdfPageLayoutMode.continuous,
+          pageLayoutMode: isHorizontalNavigation ? PdfPageLayoutMode.single : PdfPageLayoutMode.continuous,
           scrollDirection: isHorizontalNavigation ? PdfScrollDirection.horizontal : PdfScrollDirection.vertical,
           onDocumentLoaded: (details) => onDocumentLoaded(details.document.pages.count),
           onPageChanged: (details) => onPageChanged(details.newPageNumber),
