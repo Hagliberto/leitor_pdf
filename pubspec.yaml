@@ -2,7 +2,7 @@ name: folhear
 description: Folhear - leitor e visualizador de documentos PDF multiplataforma.
 publish_to: "none"
 
-version: 1.1.9+37
+version: 1.2.1+39
 
 environment:
   sdk: ^3.5.0
