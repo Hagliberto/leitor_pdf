@@ -3,9 +3,9 @@ class AppInfo {
   static const String name = 'Folhear';
   static const String badge = 'PDF';
   static const String subtitle = 'Biblioteca inteligente de PDFs';
-  static const String versionName = '1.1.6';
-  static const int versionCode = 34;
+  static const String versionName = '1.2.16';
+  static const int versionCode = 54;
   static const String version = 'v$versionName+$versionCode';
-  static const String versionDate = '21/04/2026';
-  static const String releaseNote = 'empty states informativos, ícone PDF, pastas em modal e criação avançada de pastas';
+  static const String versionDate = '26/04/2026';
+  static const String releaseNote = 'correção do estado vazio em CustomScrollView sem SliverFillRemaining com LayoutBuilder, preservando responsividade mobile dos cards e data oficial de atualização.';
 }

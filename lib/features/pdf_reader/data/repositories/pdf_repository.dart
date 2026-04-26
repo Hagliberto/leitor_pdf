@@ -23,8 +23,211 @@ class PdfRepository {
   static const String _postItsKey = 'pdf_page_post_its';
   static const String _deletedDocumentsKey = 'deleted_pdf_documents';
   static const String _pdfEditsKey = 'pdf_page_edits';
+  static const String _operationLogsKey = 'folhear_operation_logs';
 
   final Map<String, List<Map<String, dynamic>>> _pagesCache = <String, List<Map<String, dynamic>>>{};
+
+  List<String> _compactLocalDocumentPayload(List<String> rawDocuments) {
+    return rawDocuments.map((raw) {
+      try {
+        final json = jsonDecode(raw) as Map<String, dynamic>;
+        // Nunca duplicar o Base64 do PDF dentro do histórico. No Flutter Web,
+        // o documento já ocupa bastante espaço no localStorage; repetir esses
+        // bytes em cada snapshot estoura a cota e quebra a importação.
+        json['localBase64'] = null;
+        json['snapshotCompacted'] = true;
+        return jsonEncode(json);
+      } catch (_) {
+        return raw;
+      }
+    }).toList();
+  }
+
+  Future<Map<String, dynamic>> _operationSnapshot() async {
+    final prefs = await SharedPreferences.getInstance();
+    return <String, dynamic>{
+      'favorites': prefs.getStringList(_favoritesKey) ?? <String>[],
+      'favoritePages': prefs.getStringList(_favoritePagesKey) ?? <String>[],
+      'localDocuments': _compactLocalDocumentPayload(
+          prefs.getStringList(_localDocumentsKey) ?? <String>[]),
+      'folders': prefs.getStringList(_foldersKey) ?? <String>[],
+      'postIts': prefs.getStringList(_postItsKey) ?? <String>[],
+      'deletedDocuments': prefs.getStringList(_deletedDocumentsKey) ?? <String>[],
+      'pdfEdits': prefs.getStringList(_pdfEditsKey) ?? <String>[],
+    };
+  }
+
+  Future<List<String>> _rehydrateSnapshotDocuments(List<dynamic> snapshotDocs) async {
+    final currentDocs = await getLocalDocuments();
+    final currentByFile = <String, PdfDocument>{
+      for (final doc in currentDocs) doc.file: doc,
+    };
+    final restored = <String>[];
+    for (final item in snapshotDocs) {
+      try {
+        final json = jsonDecode(item.toString()) as Map<String, dynamic>;
+        final file = json['file']?.toString();
+        final current = file == null ? null : currentByFile[file];
+        if ((json['localBase64'] == null || json['localBase64'].toString().isEmpty) &&
+            (current?.localBase64?.isNotEmpty ?? false)) {
+          json['localBase64'] = current!.localBase64;
+        }
+        if ((json['localPath'] == null || json['localPath'].toString().isEmpty) &&
+            (current?.localPath?.isNotEmpty ?? false)) {
+          json['localPath'] = current!.localPath;
+        }
+        json.remove('snapshotCompacted');
+        restored.add(jsonEncode(json));
+      } catch (_) {
+        restored.add(item.toString());
+      }
+    }
+    return restored;
+  }
+
+  Future<void> _restoreOperationSnapshot(Map<String, dynamic> snapshot) async {
+    final prefs = await SharedPreferences.getInstance();
+    Future<void> setList(String key, String snapshotKey) async {
+      final value = (snapshot[snapshotKey] as List<dynamic>? ?? const <dynamic>[])
+          .map((item) => item.toString())
+          .toList();
+      await prefs.setStringList(key, value);
+    }
+    await setList(_favoritesKey, 'favorites');
+    await setList(_favoritePagesKey, 'favoritePages');
+    await prefs.setStringList(
+      _localDocumentsKey,
+      await _rehydrateSnapshotDocuments(
+        snapshot['localDocuments'] as List<dynamic>? ?? const <dynamic>[],
+      ),
+    );
+    await setList(_foldersKey, 'folders');
+    await setList(_postItsKey, 'postIts');
+    await setList(_deletedDocumentsKey, 'deletedDocuments');
+    await setList(_pdfEditsKey, 'pdfEdits');
+    _pagesCache.clear();
+  }
+
+  Future<void> _safeSaveOperationLogs(SharedPreferences prefs, List<String> logs) async {
+    var compacted = logs.take(40).toList();
+    while (compacted.isNotEmpty) {
+      try {
+        await prefs.setStringList(_operationLogsKey, compacted);
+        return;
+      } catch (_) {
+        // Se o navegador já estiver perto do limite, reduzimos o histórico em
+        // vez de impedir ações principais como importar PDF.
+        compacted = compacted.take((compacted.length / 2).floor()).toList();
+      }
+    }
+    try {
+      await prefs.remove(_operationLogsKey);
+    } catch (_) {}
+  }
+
+  Future<String> addOperationLog({required String action, required String title, required String detail, bool canUndo = true}) async {
+    final prefs = await SharedPreferences.getInstance();
+    await clearExpiredOperationLogs();
+    final logs = prefs.getStringList(_operationLogsKey) ?? <String>[];
+    final item = <String, dynamic>{
+      'id': 'log-${DateTime.now().microsecondsSinceEpoch}',
+      'createdAt': DateTime.now().toIso8601String(),
+      'action': action,
+      'title': title,
+      'detail': detail,
+      'canUndo': canUndo,
+      'snapshot': canUndo ? await _operationSnapshot() : null,
+    };
+    logs.insert(0, jsonEncode(item));
+    await _safeSaveOperationLogs(prefs, logs);
+    return item['id'] as String;
+  }
+
+  Future<List<Map<String, dynamic>>> getOperationLogs() async {
+    final prefs = await SharedPreferences.getInstance();
+    await clearExpiredOperationLogs();
+    var raw = prefs.getStringList(_operationLogsKey) ?? <String>[];
+    if (raw.length > 40) {
+      raw = raw.take(40).toList();
+      await _safeSaveOperationLogs(prefs, raw);
+    }
+    return raw.map((item) {
+      try { return jsonDecode(item) as Map<String, dynamic>; } catch (_) { return null; }
+    }).whereType<Map<String, dynamic>>().toList();
+  }
+
+  Future<void> clearExpiredOperationLogs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getStringList(_operationLogsKey) ?? <String>[];
+    final now = DateTime.now();
+    final filtered = <String>[];
+    for (final item in raw) {
+      try {
+        final json = jsonDecode(item) as Map<String, dynamic>;
+        final createdAt = DateTime.tryParse(json['createdAt'] as String? ?? '');
+        if (createdAt == null || now.difference(createdAt).inHours < 48) filtered.add(item);
+      } catch (_) {}
+    }
+    if (filtered.length != raw.length) await _safeSaveOperationLogs(prefs, filtered);
+  }
+
+  Future<void> clearOperationLogs() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_operationLogsKey);
+  }
+
+  Future<void> removeOperationLog(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    final logs = await getOperationLogs();
+    await _safeSaveOperationLogs(
+      prefs,
+      logs.where((item) => item['id'] != id).map(jsonEncode).toList(),
+    );
+  }
+
+  Future<void> removeOperationLogs(List<String> ids) async {
+    final prefs = await SharedPreferences.getInstance();
+    final idsSet = ids.toSet();
+    final logs = await getOperationLogs();
+    await _safeSaveOperationLogs(
+      prefs,
+      logs.where((item) => !idsSet.contains(item['id']?.toString())).map(jsonEncode).toList(),
+    );
+  }
+
+  Future<void> replaceOperationLogs(List<Map<String, dynamic>> logs) async {
+    final prefs = await SharedPreferences.getInstance();
+    await _safeSaveOperationLogs(prefs, logs.map(jsonEncode).toList());
+  }
+
+  Future<void> restoreLatestOperationLog() async {
+    final logs = await getOperationLogs();
+    final candidate = logs.cast<Map<String, dynamic>?>().firstWhere(
+          (item) => item?['canUndo'] == true && item?['snapshot'] is Map<String, dynamic>,
+          orElse: () => null,
+        );
+    if (candidate != null) {
+      await restoreOperationLog(candidate['id'].toString());
+    }
+  }
+
+  Future<void> restoreOperationLog(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    final logs = await getOperationLogs();
+    final log = logs.cast<Map<String, dynamic>?>().firstWhere((item) => item?['id'] == id, orElse: () => null);
+    final snapshot = log?['snapshot'];
+    if (snapshot is Map<String, dynamic>) {
+      await _restoreOperationSnapshot(snapshot);
+      await _safeSaveOperationLogs(prefs, logs.where((item) => item['id'] != id).map(jsonEncode).toList());
+    }
+  }
+
+  Future<void> renameDocumentTitle({required String file, required String title}) async {
+    final documents = await getLocalDocuments();
+    final cleaned = title.trim();
+    if (cleaned.isEmpty) return;
+    await _saveLocalDocuments(documents.map((doc) => doc.file == file ? doc.copyWith(title: cleaned) : doc).toList());
+  }
 
   Future<String?> _loadTextAssetWithFallback(String assetPath) async {
     final directWebAsset = await loadDirectWebTextAsset(assetPath);
@@ -233,9 +436,21 @@ class PdfRepository {
 
   Future<void> _saveLocalDocuments(List<PdfDocument> documents) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(
-      _localDocumentsKey,
-      documents
+    final fullPayload = documents
+        .map((doc) => jsonEncode(<String, dynamic>{
+              'file': doc.file,
+              'title': doc.title,
+              'description': doc.description,
+              'version': doc.version,
+              'pageCount': doc.pageCount,
+              'localPath': doc.localPath,
+              'localBase64': doc.localBase64,
+            }))
+        .toList();
+    try {
+      await prefs.setStringList(_localDocumentsKey, fullPayload);
+    } catch (_) {
+      final compactPayload = documents
           .map((doc) => jsonEncode(<String, dynamic>{
                 'file': doc.file,
                 'title': doc.title,
@@ -243,10 +458,11 @@ class PdfRepository {
                 'version': doc.version,
                 'pageCount': doc.pageCount,
                 'localPath': doc.localPath,
-                'localBase64': doc.localBase64,
+                'localBase64': kIsWeb ? null : doc.localBase64,
               }))
-          .toList(),
-    );
+          .toList();
+      await prefs.setStringList(_localDocumentsKey, compactPayload);
+    }
   }
 
   Future<List<PdfDocument>> importPdfsFromDevice() async {
@@ -384,7 +600,56 @@ class PdfRepository {
       await _saveFolders(<PdfFolder>[root]);
       return <PdfFolder>[root];
     }
-    return folders..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    var changed = false;
+    final normalizedFolders = folders.map((folder) {
+      if (folder.id != 'root' &&
+          folder.parentId == 'root' &&
+          (folder.categoryName == null || folder.categoryName!.trim().isEmpty)) {
+        changed = true;
+        return folder.copyWith(categoryName: folder.name);
+      }
+      return folder;
+    }).toList();
+    // Saneia duplicidades criadas em versões anteriores: quando duas pastas
+    // estão no mesmo nível e possuem o mesmo nome visual, mantemos a primeira,
+    // mesclamos PDFs e redirecionamos filhos para ela. Isso evita expanders
+    // repetidos na página Pastas sem apagar documentos.
+    final deduped = <PdfFolder>[];
+    final keeperByKey = <String, PdfFolder>{};
+    final remapParentId = <String, String>{};
+    String keyOf(PdfFolder folder) => "${folder.parentId ?? ''}|${folder.name.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ')}";
+
+    for (final folder in normalizedFolders) {
+      final key = keyOf(folder);
+      final existing = keeperByKey[key];
+      if (existing == null || folder.id == 'root') {
+        keeperByKey[key] = folder;
+        deduped.add(folder);
+        continue;
+      }
+      changed = true;
+      remapParentId[folder.id] = existing.id;
+      final mergedFiles = <String>{...existing.documentFiles, ...folder.documentFiles}.toList()..sort();
+      final idx = deduped.indexWhere((item) => item.id == existing.id);
+      if (idx >= 0) {
+        final merged = existing.copyWith(documentFiles: mergedFiles);
+        deduped[idx] = merged;
+        keeperByKey[key] = merged;
+      }
+    }
+
+    final remapped = deduped.map((folder) {
+      final newParent = remapParentId[folder.parentId];
+      if (newParent == null) return folder;
+      changed = true;
+      return folder.copyWith(parentId: newParent);
+    }).toList();
+
+    if (changed) {
+      await _saveFolders(remapped);
+    }
+    return remapped
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
   }
 
   Future<void> _saveFolders(List<PdfFolder> folders) async {
@@ -394,12 +659,14 @@ class PdfRepository {
 
   Future<PdfFolder> createFolder({required String name, String? parentId}) async {
     final folders = await getFolders();
+    final normalizedName = name.trim().isEmpty ? 'Nova pasta' : name.trim();
     final folder = PdfFolder(
       id: 'folder-${DateTime.now().microsecondsSinceEpoch}',
-      name: name.trim().isEmpty ? 'Nova pasta' : name.trim(),
+      name: normalizedName,
       parentId: parentId ?? 'root',
       documentFiles: const <String>[],
       createdAt: DateTime.now().toIso8601String(),
+      categoryName: (parentId == null || parentId == 'root') ? normalizedName : null,
     );
     folders.add(folder);
     await _saveFolders(folders);
@@ -411,9 +678,34 @@ class PdfRepository {
     await _saveFolders(folders.map((folder) => folder.id == folderId ? folder.copyWith(name: name.trim().isEmpty ? folder.name : name.trim()) : folder).toList());
   }
 
+  Future<void> renameFolderCategory({
+    required String folderId,
+    required String categoryName,
+  }) async {
+    final folders = await getFolders();
+    final cleaned = categoryName.trim();
+    if (cleaned.isEmpty) return;
+    await _saveFolders(
+      folders.map((folder) {
+        if (folder.id != folderId) return folder;
+        return folder.copyWith(categoryName: cleaned);
+      }).toList(),
+    );
+  }
+
   Future<void> updateFolderColor({required String folderId, required int colorValue}) async {
     final folders = await getFolders();
     await _saveFolders(folders.map((folder) => folder.id == folderId ? folder.copyWith(colorValue: colorValue) : folder).toList());
+  }
+
+  Future<void> moveFolderToParent({required String folderId, String? newParentId}) async {
+    if (folderId == 'root') return;
+    final folders = await getFolders();
+    final updated = folders.map((folder) {
+      if (folder.id != folderId) return folder;
+      return folder.copyWith(parentId: newParentId ?? 'root');
+    }).toList();
+    await _saveFolders(updated);
   }
 
   Future<void> deleteFolder(String folderId) async {
@@ -677,8 +969,9 @@ class PdfFolder {
   final List<String> documentFiles;
   final String createdAt;
   final int colorValue;
+  final String? categoryName;
 
-  const PdfFolder({required this.id, required this.name, required this.parentId, required this.documentFiles, required this.createdAt, this.colorValue = 0xFF0B5CAD});
+  const PdfFolder({required this.id, required this.name, required this.parentId, required this.documentFiles, required this.createdAt, this.colorValue = 0xFF0B5CAD, this.categoryName});
 
   factory PdfFolder.fromJson(Map<String, dynamic> json) {
     return PdfFolder(
@@ -688,12 +981,13 @@ class PdfFolder {
       documentFiles: (json['documentFiles'] as List<dynamic>? ?? const <dynamic>[]).map((item) => item.toString()).toList(),
       createdAt: json['createdAt'] as String? ?? '',
       colorValue: json['colorValue'] as int? ?? 0xFF0B5CAD,
+      categoryName: json['categoryName'] as String?,
     );
   }
 
-  Map<String, dynamic> toJson() => <String, dynamic>{'id': id, 'name': name, 'parentId': parentId, 'documentFiles': documentFiles, 'createdAt': createdAt, 'colorValue': colorValue};
+  Map<String, dynamic> toJson() => <String, dynamic>{'id': id, 'name': name, 'parentId': parentId, 'documentFiles': documentFiles, 'createdAt': createdAt, 'colorValue': colorValue, 'categoryName': categoryName};
 
-  PdfFolder copyWith({String? id, String? name, String? parentId, bool clearParentId = false, List<String>? documentFiles, String? createdAt, int? colorValue}) {
+  PdfFolder copyWith({String? id, String? name, String? parentId, bool clearParentId = false, List<String>? documentFiles, String? createdAt, int? colorValue, String? categoryName, bool clearCategoryName = false}) {
     return PdfFolder(
       id: id ?? this.id,
       name: name ?? this.name,
@@ -701,6 +995,7 @@ class PdfFolder {
       documentFiles: documentFiles ?? this.documentFiles,
       createdAt: createdAt ?? this.createdAt,
       colorValue: colorValue ?? this.colorValue,
+      categoryName: clearCategoryName ? null : (categoryName ?? this.categoryName),
     );
   }
 }

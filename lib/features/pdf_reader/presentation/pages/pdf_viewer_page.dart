@@ -932,6 +932,32 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
     if (selected != null) _insertAtCursor(controller, '$selected ');
   }
 
+  void _openImageFullScreen(String imageBase64, String? imageName) {
+    showDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.92),
+      builder: (context) => Dialog.fullscreen(
+        backgroundColor: Colors.black,
+        child: Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            foregroundColor: Colors.white,
+            title: Text(imageName ?? 'Imagem do post-it', maxLines: 1, overflow: TextOverflow.ellipsis),
+            actions: [IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.close_rounded))],
+          ),
+          body: Center(
+            child: InteractiveViewer(
+              minScale: 0.5,
+              maxScale: 5,
+              child: Image.memory(base64Decode(imageBase64), fit: BoxFit.contain),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   /// Abre um post-it robusto da página atual.
   ///
   /// Quando [entry] é informado, abre o post-it existente. Sem [entry], cria
@@ -1047,7 +1073,7 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
                     if (!editing)
                       GestureDetector(
                         onTap: () => setSheetState(() => editing = true),
-                        child: _PostItCardView(data: data, onToggleTask: toggleTask),
+                        child: _PostItCardView(data: data, onToggleTask: toggleTask, onImageTap: _openImageFullScreen),
                       )
                     else ...[
                       Wrap(spacing: 6, runSpacing: 6, children: [
@@ -1093,28 +1119,50 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
                         decoration: InputDecoration(hintText: 'Observação, resumo, alerta ou lembrete desta página...', filled: true, fillColor: Colors.white.withOpacity(0.78), border: OutlineInputBorder(borderRadius: BorderRadius.circular(20))),
                       ),
                       const SizedBox(height: 10),
-                      Wrap(spacing: 8, runSpacing: 8, children: [
-                        ActionChip(avatar: const Icon(Icons.format_bold, color: Color(0xFF1565C0)), label: const Text('B'), onPressed: () => setSheetState(() => _formatSelectionOrInsert(controller, '**', '**'))),
-                        ActionChip(avatar: const Icon(Icons.format_italic, color: Color(0xFF5E35B1)), label: const Text('I'), onPressed: () => setSheetState(() => _formatSelectionOrInsert(controller, '_', '_'))),
-                        ActionChip(avatar: const Icon(Icons.format_underlined, color: Color(0xFF00838F)), label: const Text('U'), onPressed: () => setSheetState(() => _formatSelectionOrInsert(controller, '<u>', '</u>'))),
-                        ActionChip(avatar: const Icon(Icons.format_list_bulleted, color: Color(0xFF2E7D32)), label: const Text('Lista'), onPressed: () => setSheetState(() => _insertAtCursor(controller, '\n• '))),
-                        ActionChip(avatar: const Icon(Icons.image_outlined, color: Color(0xFF0277BD)), label: Text(imageName == null ? 'Imagem' : 'Trocar imagem'), onPressed: () => attachImage(setSheetState)),
-                        ActionChip(avatar: const Icon(Icons.emoji_symbols_rounded, color: Color(0xFFE65100)), label: const Text('Ícones'), onPressed: () async { await _openIconGallery(controller); setSheetState(() {}); }),
-                        if (imageBase64 != null)
-                          ActionChip(
-                            avatar: const Icon(Icons.delete_outline),
-                            label: const Text('Remover imagem'),
-                            onPressed: () => setSheetState(() {
-                              imageBase64 = null;
-                              imageName = null;
-                            }),
-                          ),
-                      ]),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.62),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: Colors.white.withOpacity(0.78)),
+                        ),
+                        child: Wrap(spacing: 8, runSpacing: 8, children: [
+                          _PostItToolChip(icon: Icons.format_bold, label: 'Negrito', color: const Color(0xFF1565C0), onPressed: () => setSheetState(() => _formatSelectionOrInsert(controller, '**', '**'))),
+                          _PostItToolChip(icon: Icons.format_italic, label: 'Itálico', color: const Color(0xFF5E35B1), onPressed: () => setSheetState(() => _formatSelectionOrInsert(controller, '_', '_'))),
+                          _PostItToolChip(icon: Icons.format_underlined, label: 'Sublinhado', color: const Color(0xFF00838F), onPressed: () => setSheetState(() => _formatSelectionOrInsert(controller, '<u>', '</u>'))),
+                          _PostItToolChip(icon: Icons.format_list_bulleted, label: 'Lista', color: const Color(0xFF2E7D32), onPressed: () => setSheetState(() => _insertAtCursor(controller, '\n• '))),
+                          _PostItToolChip(icon: Icons.image_outlined, label: imageName == null ? 'Imagem' : 'Trocar', color: const Color(0xFF0277BD), onPressed: () => attachImage(setSheetState)),
+                          _PostItToolChip(icon: Icons.emoji_symbols_rounded, label: 'Ícones', color: const Color(0xFFE65100), onPressed: () async { await _openIconGallery(controller); setSheetState(() {}); }),
+                          if (imageBase64 != null)
+                            _PostItToolChip(
+                              icon: Icons.delete_outline,
+                              label: 'Remover imagem',
+                              color: const Color(0xFFC62828),
+                              onPressed: () => setSheetState(() {
+                                imageBase64 = null;
+                                imageName = null;
+                              }),
+                            ),
+                        ]),
+                      ),
                       if (imageBase64 != null) ...[
                         const SizedBox(height: 10),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(18),
-                          child: Image.memory(base64Decode(imageBase64!), height: 120, width: double.infinity, fit: BoxFit.cover),
+                        GestureDetector(
+                          onTap: () => _openImageFullScreen(imageBase64!, imageName),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(18),
+                                child: Image.memory(base64Decode(imageBase64!), height: 120, width: double.infinity, fit: BoxFit.cover),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(color: Colors.black.withOpacity(0.55), borderRadius: BorderRadius.circular(999)),
+                                child: const Row(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.fullscreen_rounded, color: Colors.white, size: 18), SizedBox(width: 6), Text('Abrir imagem', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800))]),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ],
@@ -1588,11 +1636,31 @@ class _PdfViewerPageState extends ConsumerState<PdfViewerPage> {
 }
 
 
+class _PostItToolChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onPressed;
+
+  const _PostItToolChip({required this.icon, required this.label, required this.color, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionChip(
+      avatar: Icon(icon, color: color, size: 18),
+      label: Text(label),
+      visualDensity: VisualDensity.compact,
+      onPressed: onPressed,
+    );
+  }
+}
+
 class _PostItCardView extends StatelessWidget {
   final _PostItData data;
   final ValueChanged<int> onToggleTask;
+  final void Function(String imageBase64, String? imageName)? onImageTap;
 
-  const _PostItCardView({required this.data, required this.onToggleTask});
+  const _PostItCardView({required this.data, required this.onToggleTask, this.onImageTap});
 
   String _cleanMarkdown(String value) {
     return value
@@ -1649,9 +1717,22 @@ class _PostItCardView extends StatelessWidget {
             ),
         if (data.imageBase64 != null && data.imageBase64!.isNotEmpty) ...[
           const SizedBox(height: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(18),
-            child: Image.memory(base64Decode(data.imageBase64!), height: 160, width: double.infinity, fit: BoxFit.cover),
+          GestureDetector(
+            onTap: () => onImageTap?.call(data.imageBase64!, data.imageName),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(18),
+                  child: Image.memory(base64Decode(data.imageBase64!), height: 160, width: double.infinity, fit: BoxFit.cover),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(color: Colors.black.withOpacity(0.55), borderRadius: BorderRadius.circular(999)),
+                  child: const Row(mainAxisSize: MainAxisSize.min, children: [Icon(Icons.fullscreen_rounded, color: Colors.white, size: 18), SizedBox(width: 6), Text('Tela cheia', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800))]),
+                ),
+              ],
+            ),
           ),
           if (data.imageName != null)
             Padding(
@@ -1913,11 +1994,12 @@ class _NativePdfViewer extends StatelessWidget {
 
         return SfPdfViewer.memory(
           snapshot.data!,
+          key: ValueKey('native-pdf-${isHorizontalNavigation ? 'horizontal' : 'vertical'}'),
           controller: pdfController,
           canShowScrollHead: true,
           canShowScrollStatus: true,
           enableDoubleTapZooming: true,
-          pageLayoutMode: PdfPageLayoutMode.continuous,
+          pageLayoutMode: isHorizontalNavigation ? PdfPageLayoutMode.single : PdfPageLayoutMode.continuous,
           scrollDirection: isHorizontalNavigation ? PdfScrollDirection.horizontal : PdfScrollDirection.vertical,
           onDocumentLoaded: (details) => onDocumentLoaded(details.document.pages.count),
           onPageChanged: (details) => onPageChanged(details.newPageNumber),
