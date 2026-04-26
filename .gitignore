@@ -77,3 +77,5 @@ VARIADOS/
 # -----------------------------------------------------------------------------
 # Nunca subir arquivos de ambiente com senhas/chaves
 .env*
+debug-info/
+screen/
