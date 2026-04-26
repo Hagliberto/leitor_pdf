@@ -1,16 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:folhear/app/pdf_reader_app.dart';
+import '../lib/app/pdf_reader_app.dart';
 
 void main() {
-  testWidgets('Renderiza o aplicativo Folhear', (tester) async {
+  testWidgets('Renderiza o app leitor de PDFs', (tester) async {
     await tester.pumpWidget(
-      const ProviderScope(
+      ProviderScope(
         child: PdfReaderApp(),
       ),
     );
 
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(find.text('Folhear'), findsWidgets);
+    expect(find.text('Leitor Digital de PDFs'), findsOneWidget);
   });
 }
